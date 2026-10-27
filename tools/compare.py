@@ -1,7 +1,9 @@
 """Compare a predicted diagram (e.g., LLM output) with a reference (gold or seeded).
 
 Scores each layer separately, because we expect the workflow layer to be easy
-and the routing/argument layers to be where agreement and accuracy diverge.
+and the claims and argument layers to be where agreement and accuracy diverge.
+The argument layer belongs to the argumentation lens and is scored only when the
+reference map codes it.
 
 Nodes are matched by (canonical activity, lane); edges by matched endpoints
 and type; claims by their sequence of states; argument breakdowns by
@@ -34,7 +36,7 @@ def node_key(n, dom="radiology"):
 def score(ref, pred):
     rkeys = {n["id"]: node_key(n, domain_of(ref)) for n in ref["nodes"]}
     pkeys = {n["id"]: node_key(n, domain_of(ref)) for n in pred["nodes"]}
-    return {
+    out = {
         "workflow.nodes": f1(rkeys.values(), pkeys.values()),
         "workflow.edges": f1(
             [(rkeys[e["from"]], rkeys[e["to"]], e["type"]) for e in ref["edges"]],
@@ -46,11 +48,13 @@ def score(ref, pred):
         "routing.unexamined_agreement": f1(
             [c["claim_source"] for c in ref["routing"] if c.get("unexamined_agreement")],
             [c["claim_source"] for c in pred["routing"] if c.get("unexamined_agreement")]),
-        "argument.breakdowns": f1([(b["element"], b["status"]) for b in ref.get("argument", [])],
-                                  [(b["element"], b["status"]) for b in pred.get("argument", [])]),
-        "argument.labor": f1([l for b in ref.get("argument", []) for l in b["labor"]],
-                             [l for b in pred.get("argument", []) for l in b["labor"]]),
     }
+    if "argument" in ref:   # argumentation lens: scored only when the reference codes it
+        out["argument.breakdowns"] = f1([(b["element"], b["status"]) for b in ref.get("argument", [])],
+                                        [(b["element"], b["status"]) for b in pred.get("argument", [])])
+        out["argument.labor"] = f1([l for b in ref.get("argument", []) for l in b["labor"]],
+                                   [l for b in pred.get("argument", []) for l in b["labor"]])
+    return out
 
 
 def main():

@@ -9,7 +9,7 @@ Two layouts:
 Conventions follow the notebook: dashed border = AI element (square corners for
 AI in the worklist, rounded for AI in the viewer), double border = sign-off
 (closure), bold border = entry point, dashed arrow = doubt or interrogation,
-dotted arrow = institutional loop, [R]/[C]/[A]/[I] = argumentation labor.
+dotted arrow = institutional loop, [R]/[C]/[A]/[I] = argumentation labor (argumentation lens).
 
 Usage: python3 render.py ../gold/vignette1_automated_triage.json -o ../renders
        python3 render.py ../gold/*.json -o ../renders --layout levels

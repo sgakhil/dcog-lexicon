@@ -4,7 +4,7 @@ A lexicon and a local AI tool for turning ethnographic fieldnotes into **activit
 
 The tool runs an open-weight model **on the researcher's own machine**, because fieldnotes from hospitals, firms and other sensitive sites usually cannot be sent to a cloud service. It produces a draft map; the researcher checks and corrects it.
 
-Anonymous authors (under review). Version 1.2, October 2026. Stage 1 research artifact for the *Organization Science* special issue "AI-Enabled Frontiers in Organizational Science".
+Anonymous authors (under review). Version 1.3, October 2026. Stage 1 research artifact for the *Organization Science* special issue "AI-Enabled Frontiers in Organizational Science".
 
 ## Start here
 
@@ -26,7 +26,8 @@ The lexicon has two parts:
 
 | Part | File | Contents |
 | --- | --- | --- |
-| Core (every setting) | `schema/core.json` | Link types (action, doubt, institutional); claim states (provisional acceptance, validation, consultation, deferral); triggers; Toulmin breakdowns and repair labor; lane roles (queue, work, record) and AI roles (triage, support, second opinion) |
+| Core (every setting) | `schema/core.json` | Link types (action, doubt, institutional); claim states (provisional acceptance, validation, consultation, deferral); triggers; lane roles (queue, work, record) and AI roles (triage, support, second opinion) |
+| Coding lens (optional) | `lenses/<name>.json` | A theory-specific layer; the first is argumentation: Toulmin breakdowns and argumentation labor |
 | Domain (one per setting) | `domains/<name>.json` | That setting's screens, software, activities, AI tools, and what counts as an independent check |
 
 Three domains ship now. Radiology is the base case; the other two are extension cases (Burawoy, 1998), synthetic for now:
@@ -40,6 +41,8 @@ Three domains ship now. Radiology is the base case; the other two are extension 
 The object of every map is a relation rather than a person or a place: how a claim passes between people, AI and screens (relational ethnography; Desmond, 2014).
 
 A new setting needs only a new domain file; the core, the rules and the tools stay the same.
+
+The lexicon is also modular in theory. **Coding lenses** (`lenses/`) add layers coded from one theoretical perspective and can be switched off; the first is argumentation (Toulmin breakdowns and argumentation labor). **Analysis layers** (`tools/layers/`) are computed from finished maps and re-run on any corrected version; the first two are reachability and labor by screen. Each is a single file, found automatically.
 
 ## What works and what does not yet
 
@@ -63,10 +66,13 @@ docs/index.html              Standalone project page (served as the website)
 site/template.html           Source of the project page
 site/mapdraw.js              Map drawing shared by the project page and the app
 tools/app.py, app.html       Local browser app: paste a note, draft, correct, save, compare
+tools/analyse.py, layers/    Analysis layers computed from maps (reachability, labor_by_screen)
+lenses/                      Coding lenses: optional theory-specific layers (argumentation)
 tools/extract.py             Fieldnote to draft map, with a local model (--domain)
 tools/validate.py            Checks a map against the schema, its domain and the rules
 tools/render.py              Draws a map (screen lanes, or notebook-style escalation rows)
 tools/compare.py             Scores one map against another, layer by layer
+tools/compare_episodes.py    Compares two episodes side by side (same setting: steps; across settings: labor)
 tools/synthesize.py          Synthetic fieldnotes with known answers, for testing extraction
 tools/evaluate.py            Scores a folder of drafts against their answer keys
 tools/selftest.py            Checks the whole toolkit on your computer, including the local model
@@ -105,5 +111,5 @@ Real fieldnotes stay with the researchers and are processed only on their own ma
 
 ## Citation
 
-Anonymous (2026). *dcog-lexicon: A lexicon and local AI tool for mapping distributed cognition in human–AI work* (Version 1.2). Under review.
+Anonymous (2026). *dcog-lexicon: A lexicon and local AI tool for mapping human–AI relations* (Version 1.3). Under review.
 

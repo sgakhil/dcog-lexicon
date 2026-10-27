@@ -85,7 +85,17 @@ function MapDraw(DOMS) {
     return [b.cx + dx * s, b.cy + dy * s];
   }
   let uid = 0;
-  function draw(d, mount, mode) {
+  // marks from analysis layers: [{on:"node"|"edge", id|from,to, tag, level:"info"|"warn"}]
+  const MARK = { info: "var(--good)", warn: "#d98a00", diff: "var(--inst)" };
+  function draw(d, mount, mode, marks) {
+    const ME = {}, MN = {};
+    (marks || []).forEach((k) => {
+      if (k.on === "edge") ME[k.from + ">" + k.to] = k;
+      else if (k.on === "node") {   // several layers can mark one step: join their tags in one badge
+        const o = MN[k.id];
+        MN[k.id] = o ? { tag: [o.tag, k.tag].filter(Boolean).join(" · "), level: o.level === "warn" || k.level === "warn" ? "warn" : "info" } : k;
+      }
+    });
     const D = domOf(d), id = "g" + ++uid, L = mode === "levels" ? layoutLevels(d, D) : layoutLanes(d, D), { B, W, H } = L;
     const col = { action: "var(--muted)", doubt: "var(--doubt)", institutional: "var(--inst)" };
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(d.title)}" xmlns="http://www.w3.org/2000/svg" style="min-width:${Math.round(W * 0.66)}px"><defs>` +
@@ -98,6 +108,8 @@ function MapDraw(DOMS) {
       const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, bend = back ? 44 : skip ? -40 : 0;
       const nx = -(y2 - y1), ny = x2 - x1, nl = Math.hypot(nx, ny) || 1, cx = mx + (nx / nl) * bend, cy = my + (ny / nl) * bend;
       const dash = e.type === "doubt" ? ' stroke-dasharray="6 4"' : e.type === "institutional" ? ' stroke-dasharray="2 4"' : "";
+      const mk = ME[e.from + ">" + e.to];
+      if (mk) s += `<path d="M${x1},${y1} Q${cx},${cy} ${x2},${y2}" fill="none" stroke="${MARK[mk.level] || MARK.warn}" stroke-width="8" stroke-opacity="0.35" stroke-linecap="round"/>`;
       s += `<path d="M${x1},${y1} Q${cx},${cy} ${x2},${y2}" fill="none" stroke="${col[e.type]}" stroke-width="1.4"${dash} marker-end="url(#${id}-${e.type})"/>`;
       if (e.label) { const lx = (x1 + 2 * cx + x2) / 4, ly = (y1 + 2 * cy + y2) / 4;
         s += `<text x="${lx + 4}" y="${ly - 4}" font-family="var(--sans)" font-size="10" fill="${col[e.type]}" paint-order="stroke" stroke="var(--sheet)" stroke-width="3">${esc(e.label)}</text>`; }
@@ -113,6 +125,10 @@ function MapDraw(DOMS) {
           sys: 'font-size="10" fill="var(--muted)" font-family="var(--sans)"' }[ln.k];
         s += `<text x="${b.cx}" y="${b.y + 16 + i * LINE_H}" text-anchor="middle" ${st}>${esc(ln.t)}</text>`;
       });
+      const nm = MN[n.id];
+      if (nm && nm.tag) { const tw = 8 + nm.tag.length * 5.6, c = MARK[nm.level] || MARK.info;
+        s += `<rect x="${b.x + b.w - tw - 4}" y="${b.y - 8}" width="${tw}" height="15" rx="7.5" fill="${c}"/>`;
+        s += `<text x="${b.x + b.w - 4 - tw / 2}" y="${b.y + 3}" text-anchor="middle" font-family="var(--sans)" font-size="9.5" font-weight="600" fill="var(--sheet)">${esc(nm.tag)}</text>`; }
     });
     mount.innerHTML = s + "</svg>";
   }
@@ -127,7 +143,7 @@ function MapDraw(DOMS) {
     [sw('<line x1="2" y1="9" x2="32" y2="9" stroke="var(--muted)" stroke-width="1.6"/><path d="M32 5 L38 9 L32 13 z" fill="var(--muted)"/>'), "action"],
     [sw('<line x1="2" y1="9" x2="32" y2="9" stroke="var(--doubt)" stroke-width="1.6" stroke-dasharray="5 3"/><path d="M32 5 L38 9 L32 13 z" fill="var(--doubt)"/>'), "doubt"],
     [sw('<line x1="2" y1="9" x2="32" y2="9" stroke="var(--inst)" stroke-width="1.6" stroke-dasharray="2 3"/><path d="M32 5 L38 9 L32 13 z" fill="var(--inst)"/>'), "institutional"],
-    ['<span class="mono">[R][C][A][I]</span>', "repair labor"],
+    ['<span class="mono">[R][C][A][I]</span>', "argumentation labor"],
   ].map(([m, t]) => `<span>${m}${t}</span>`).join("");
 
   function layersHTML(d) {
@@ -138,5 +154,29 @@ function MapDraw(DOMS) {
     return `<div><h3>Claims</h3>${claims}</div><div><h3>Argument</h3>${arg}</div>
       <div><h3>Source</h3><p>${esc((d.source || {}).origin || "Draft")}</p>${(d.source || {}).notes ? `<p class="muted" style="margin-top:6px">${esc(d.source.notes)}</p>` : ""}</div>`;
   }
-  return { draw, legendHTML, layersHTML };
+  // comparison of two episodes (tools/compare_episodes.py): facts, verdicts, labor and plain sentences
+  function compareHTML(r, collapse) {
+    const cell = (v) => `<td>${esc(v === null || v === undefined || v === "" ? "–" : v)}</td>`;
+    let h = `<div class="cmpsum"><p class="small muted">${esc(r.mode === "labor across settings"
+      ? "Different settings: step names differ, so the comparison uses argumentation labor (argumentation lens), which both settings share."
+      : "Same setting: steps are matched by activity and screen. Steps found in only one map are outlined.")}</p>`;
+    if ((r.sentences || []).length) h += "<ul>" + r.sentences.map((x) => `<li>${esc(x)}</li>`).join("") + "</ul>";
+    const top = h; h = "";
+    if ((r.facts || []).length) h += `<div class="tablewrap"><table><thead><tr><th></th><th>A</th><th>B</th></tr></thead><tbody>` +
+      r.facts.map((f) => `<tr><td>${esc(f[0])}</td>${cell(f[1])}${cell(f[2])}</tr>`).join("") + "</tbody></table></div>";
+    if (r.reachability) {
+      const side = (rows) => rows.length ? rows.map(([c, v]) => `<div>${esc(c)}: <b class="${/unchecked/.test(v) ? "verdict-warn" : /every/.test(v) ? "verdict-ok" : ""}">${esc(v)}</b></div>`).join("") : "–";
+      h += `<div class="tablewrap"><table><thead><tr><th>Reachability</th><th>A</th><th>B</th></tr></thead><tbody><tr><td>Claims</td><td>${side(r.reachability.a)}</td><td>${side(r.reachability.b)}</td></tr></tbody></table></div>`;
+    }
+    const L = r.labor || {};
+    if (L.a && L.b) {
+      h += `<div class="tablewrap"><table><thead><tr><th>Argumentation labor</th><th>A</th><th>B</th></tr></thead><tbody>` +
+        Object.entries(L.kinds).map(([k, name]) => `<tr><td>${esc(name)}</td>${cell(L.a.by_kind[k] || 0)}${cell(L.b.by_kind[k] || 0)}</tr>`).join("") +
+        ["queue", "work", "record"].map((role) => `<tr><td>Placed on ${role} screens</td>${cell(L.a.by_role[role] || 0)}${cell(L.b.by_role[role] || 0)}</tr>`).join("") +
+        `<tr><td>After an AI step</td>${cell(L.a.after_ai)}${cell(L.b.after_ai)}</tr></tbody></table></div>`;
+    }
+    if (collapse && h) return top + `<details class="cmpdetails"><summary>Details <span>steps, claims, reachability, argumentation labor</span></summary>${h}</details></div>`;
+    return top + h + "</div>";
+  }
+  return { draw, legendHTML, layersHTML, compareHTML };
 }

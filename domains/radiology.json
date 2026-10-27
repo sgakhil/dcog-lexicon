@@ -275,6 +275,13 @@
     "other": "Any other model; name it in detail"
   },
   "independent_checks": "Priors, other views or series, measurements against priors, patient history, a colleague, a reference image.",
+  "check_activities": [
+    "Search priors",
+    "Compare prior volumes",
+    "Review patient history",
+    "Look up reference images",
+    "Message colleague"
+  ],
   "example": {
     "note": "examples/fn031_illustrative_note.txt",
     "map": "examples/episode_fn031.json"

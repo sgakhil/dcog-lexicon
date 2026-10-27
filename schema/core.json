@@ -1,6 +1,6 @@
 {
-  "version": "1.2",
-  "about": "Domain-neutral part of the lexicon: how steps link, how claims are handled, how arguments break. Every domain file uses these terms unchanged.",
+  "version": "1.3",
+  "about": "Domain-neutral part of the lexicon: how steps link and what can happen to a claim. Theory-specific layers, such as argumentation, live in lenses/.",
   "lane_roles": {
     "queue": "Where work arrives and is sorted or prioritised (a worklist, a ticket queue, an inbox).",
     "work": "Where the main task is done and checked (an image viewer, a code editor, a case file).",
@@ -28,29 +28,6 @@
     "human": "Asserted by a person.",
     "ai": "Asserted by an AI model.",
     "hybrid": "Asserted jointly, typically when reader and AI agree."
-  },
-  "toulmin": {
-    "claim": "The conclusion asserted (a finding, a diagnosis, a fix).",
-    "data": "The evidence the claim rests on.",
-    "warrant": "Why the data supports the claim.",
-    "backing": "What makes the warrant trustworthy (for an AI, how it was validated or trained).",
-    "qualifier": "How strongly the claim is held (priority, confidence).",
-    "rebuttal": "Conditions under which the claim would not hold."
-  },
-  "argument_status": {
-    "missing": "The element is not given at all (e.g. a flag with no reason).",
-    "ambiguous": "The element is given but can be read more than one way.",
-    "opaque": "The element exists but cannot be inspected.",
-    "absent": "The reader would expect it and it is not there.",
-    "unstable": "The element changes over time or between cases (e.g. after a model update).",
-    "expanded": "The reader adds more of this element than usual (e.g. extra rebuttals).",
-    "persistent": "The element stays open after sign-off (e.g. a rebuttal carried into the report)."
-  },
-  "labor": {
-    "R": "Reconstructive: reverse-engineering a missing warrant",
-    "C": "Comparative: testing own judgment against the machine, case by case",
-    "A": "Adjudicative: deciding to trust or dismiss under false flags, drift, alerts",
-    "I": "Integrative: synthesising machine output with history, physiology, trajectory"
   },
   "ai_roles": {
     "triage": "AI sorts, flags or prioritises work before the person does it.",

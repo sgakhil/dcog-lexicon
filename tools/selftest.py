@@ -71,7 +71,7 @@ def table(rows):
     say("| " + " | ".join(head) + " |")
     say("|" + " --- |" * len(head))
     for name, s in rows:
-        say(f"| {name} | " + " | ".join(f"{s[k]:.2f}" for k in keys) + " |")
+        say(f"| {name} | " + " | ".join(f"{s[k]:.2f}" if s.get(k) is not None else "–" for k in keys) + " |")
 
 
 def main():
@@ -131,6 +131,13 @@ def main():
     run(["render.py", *maps[:1], "-o", str(OUT / "renders"), "--layout", "levels"], "drawing a map")
     run(["compare.py", str(ROOT / "gold/vignette3_second_opinion.json"), str(ROOT / "examples/vignette3_predicted_example.json")], "scoring")
     run(["export_eventlog.py", *maps, "-o", str(OUT / "eventlog.csv")], "event-log export")
+    ok, dt, out = run(["analyse.py", str(ROOT / "examples/night_head_ct_synthetic.json"), "--layer", "reachability"],
+                      "analysis layer: reachability")
+    expected = "every route passes a check" in out and "can close unchecked" in out
+    say(f"- {'PASS' if expected else 'FAIL'}  reachability gives the known answer on the head-CT test map")
+    ok, dt, out = run(["analyse.py", str(ROOT / "examples/night_head_ct_synthetic.json"), "--layer", "labor_by_screen"],
+                      "analysis layer: labor by screen")
+    say(f"- {'PASS' if 'labor_codes=3' in out else 'FAIL'}  labor by screen gives the known answer on the head-CT test map")
     say()
 
     # 3. worked examples -----------------------------------------------------

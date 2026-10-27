@@ -35,14 +35,15 @@ def main():
         s = score(load(a), load(p))
         trap = (re.search(r"_(none|agreement_looks_checked|implicit_doubt|unresolved_flag)_v\d+$", a.stem)
                 or [None, "n/a"])[1]
-        rows.append({"note": a.stem, "trap": trap, **{k: s[k]["f1"] for k in LAYERS}})
+        rows.append({"note": a.stem, "trap": trap, **{k: (s[k]["f1"] if k in s else None) for k in LAYERS}})
     if not rows:
         print("nothing to score")
         return 1
 
     print(f"\nScored {len(rows)} notes. Mean F1 by layer (1.00 = matches the answer key):\n")
     for k in LAYERS:
-        print(f"  {k:32s} {mean(r[k] for r in rows):.2f}")
+        vals = [r[k] for r in rows if r[k] is not None]
+        print(f"  {k:32s} " + (f"{mean(vals):.2f}" if vals else "–  (lens not coded)"))
     traps = sorted({r["trap"] for r in rows})
     if len(traps) > 1:
         print("\nBy trap (routing.state_paths / routing.unexamined_agreement):")

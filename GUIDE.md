@@ -55,6 +55,41 @@ Your browser opens a page at `http://localhost:8765`. Paste a fieldnote (or open
 
 The app runs only on your computer: it does not listen on the network, the model is your local Ollama, and notes are saved only in `notes/`, which is never uploaded to git. Press Ctrl+C in the terminal to stop it.
 
+## Plug-ins: coding lenses and analysis layers
+
+The lexicon is modular. On top of the core (steps, links, claims) and the setting vocabularies sit two kinds of plug-in.
+
+**Coding lenses** add a layer that you or the model code while reading the note, from one theoretical perspective. The first is **argumentation**: Toulmin breakdowns and argumentation labor (R, C, A, I), the largely invisible work of keeping an argument standing. It lives in `lenses/argumentation.json`. Switch it off when your study does not use it; the model then has a shorter set of instructions, which helps small models:
+
+```
+python3 extract.py ../notes/fn045.txt --lens               # workflow and claims only
+python3 extract.py ../notes/fn045.txt --lens argumentation # with the argument layer (the default)
+```
+
+In the app, untick "Argumentation labor" before pressing Draft map.
+
+**Analysis layers** are computed from a finished map and never written into it, so they re-run on any version: a fresh draft, a corrected draft or a hand-coded map. In the app, tick a layer above the drawing; from the terminal:
+
+```
+python3 analyse.py --list
+python3 analyse.py ../gold/*.json ../predicted/*.json
+```
+
+Two layers ship as examples:
+
+- **reachability** (lens: distributed cognition, trust as routing) asks whether a claim can travel from where it starts to where it closes without passing an independent check. Which activities count as checks is set in each setting's file (`check_activities` in `domains/<name>.json`).
+- **labor_by_screen** (lens: argumentation) counts the argumentation labor on each screen and how much of it comes after an AI step. It needs the argumentation lens and says so if a map does not use it.
+
+**Compare two episodes.** In the app's "Compare two episodes" card, or from the terminal, put two maps side by side:
+
+```
+python3 compare_episodes.py ../gold/vignette2_decision_support.json ../gold/vignette3_second_opinion.json
+```
+
+Within one setting, steps are matched by activity and screen; steps found in only one map are outlined in purple, and the two maps' claims, escalation, hand-offs and layer results are set side by side. Across settings the step names differ, so the comparison uses argumentation labor from the argumentation lens, which every setting shares. It gives no score: it shows how two episodes differ, not whether one is right.
+
+To add a layer, copy `tools/layers/reachability.py`, change the rules and the name; the app and `analyse.py` find it automatically. To add a coding lens, copy `lenses/argumentation.json` and add its field to `schema/diagram.schema.json`.
+
 ## Test everything in one go
 
 Once Ollama and a model are installed, run from the `tools` folder:
@@ -69,9 +104,9 @@ It checks the setup, runs the tools without AI, has the model draft a map for ea
 
 | Tool | What goes in | What comes out | Why |
 | --- | --- | --- | --- |
-| `extract.py` | A fieldnote (`.txt`) | The AI's diagram of it (`.json`) | The AI codes your notes the way you do |
-| `synthesize.py` | One of your diagrams | A realistic fake fieldnote, plus its answer key | Shareable test data with known right answers |
-| `evaluate.py` | Answer keys + the AI's diagrams | Scores per layer | Shows where the AI matches you and where it fails |
+| `extract.py` | A fieldnote (`.txt`) | The AI's map of it (`.json`) | The AI codes your notes the way you do |
+| `synthesize.py` | One of your maps | A realistic fake fieldnote, plus its answer key | Shareable test data with known right answers |
+| `evaluate.py` | Answer keys + the AI's maps | Scores per layer | Shows where the AI matches you and where it fails |
 
 Everything runs on your own computer through **Ollama**, a free program that runs open AI models locally. No fieldnote is sent anywhere.
 
@@ -139,7 +174,7 @@ Every run is recorded in `../predicted/logs/`: exact model version, prompt versi
 
 ## Task 2: Make synthetic fieldnotes with known answers
 
-1. A plain synthetic note from one of your diagrams:
+1. A plain synthetic note from one of your maps:
    ```
    python3 synthesize.py ../gold/vignette2_decision_support.json
    ```
@@ -157,7 +192,7 @@ Every run is recorded in `../predicted/logs/`: exact model version, prompt versi
    ```
    python3 synthesize.py ../gold/*.json --trap agreement_looks_checked --variants 3
    ```
-   Diagrams that don't fit a trap are skipped with a message; that is expected.
+   Maps that don't fit a trap are skipped with a message; that is expected.
 
 3. Build a small test set: plain versions of all three vignettes, plus each trap:
    ```
@@ -176,7 +211,7 @@ python3 evaluate.py ../synthetic/answers ../predicted -o ../results.csv
 
 You get a mean score for each layer, a breakdown by trap, and a spreadsheet (`results.csv`) with one row per note.
 
-**How to read it:** 1.00 means the AI's diagram matches the answer key; 0.00 means it missed completely. The proposal predicts high scores on the `workflow` lines and lower scores on `routing` and `argument`, especially for `agreement_looks_checked`. Whatever the numbers turn out to be, they are your first results.
+**How to read it:** 1.00 means the AI's map matches the answer key; 0.00 means it missed completely. The proposal predicts high scores on the `workflow` lines and lower scores on the claims (`routing`) and `argument` lines, especially for `agreement_looks_checked`. Whatever the numbers turn out to be, they are your first results.
 
 ## For a fair comparison
 

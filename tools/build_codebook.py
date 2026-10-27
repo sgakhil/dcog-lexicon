@@ -5,7 +5,7 @@ codebook cannot drift from what the validator checks. Re-run after editing them.
 
 Usage: python3 build_codebook.py
 """
-from lexicon import CORE, ROOT, definition, domain, domain_names
+from lexicon import CORE, ROOT, definition, domain, domain_names, lens, lens_names
 
 
 def table(entries, head, extra=None):
@@ -49,6 +49,8 @@ def domain_section(name, n):
 
 **What counts as an independent check here:** {D['independent_checks']}
 
+**Activities counted as independent checks** (used by the reachability analysis layer): {', '.join(f'`{x}`' for x in D.get('check_activities', [])) or '–'}.
+
 **Worked example:** `{D['example']['note']}` coded as `{D['example']['map']}`.
 """
 
@@ -58,6 +60,27 @@ def build():
     order = ["radiology"] + [n for n in names if n != "radiology"]
     domains_md = "\n".join(domain_section(n, 2 + i) for i, n in enumerate(order))
     domain_list = "\n".join(f"- `{n}`: {domain(n)['title']}. {domain(n)['about']}" for n in order)
+    lenses_md = ""
+    for i, n in enumerate(lens_names()):
+        L = lens(n)
+        T = L["terms"]
+        lenses_md += f"""### 5.{i + 1} Coding lens: {L['title']} (`{n}`)
+
+{L['theory']} {L['about']}
+
+**Rules:** {" ".join(L['rules'])}
+
+{table(T['toulmin'], ("Toulmin element", "Meaning")) if 'toulmin' in T else ''}
+
+{table(T['argument_status'], ("Breakdown status", "Meaning")) if 'argument_status' in T else ''}
+
+{table(T['labor'], ("Labor code", "Meaning")) if 'labor' in T else ''}
+
+"""
+    import sys
+    sys.path.insert(0, str(ROOT / "tools"))
+    from layers import describe
+    layers_md = "\n".join(f"| `{d['name']}` | {d['label']} | {d['lens']} | {', '.join(d['requires']) or '–'} |" for d in describe())
     return f"""# The dcog lexicon: codebook
 
 Version {CORE['version']}. Anonymous authors (under review).
@@ -83,7 +106,7 @@ Each map has three layers.
 
 1. **Workflow.** The steps, the software each used, the screen it happened on, and typed links between steps.
 2. **Claims.** Each claim made during the episode (a finding, a diagnosis, a fix), who made it (person, AI or both), and the states it passed through before it closed or was left open.
-3. **Argument** (optional). Where the reasoning behind a claim broke down, in Toulmin's terms, and the work the person did to repair it.
+3. **Coding lenses** (optional). Extra layers that apply one theory, switched on per study. The first, **argumentation**, records where the reasoning behind a claim broke down, in Toulmin's terms, and the argumentation labor the person did to keep it standing, a largely invisible kind of work (§5).
 
 ## 2. How to code an episode
 
@@ -92,7 +115,7 @@ Each map has three layers.
 3. **Assign levels.** Level 0 is the ordinary path. When doubt sends the person to further checking, those steps go one level down. In the original notebook each level began after a “why?”.
 4. **Link the steps** with `action`, `doubt` or `institutional` links (§3.1). Add a short label where the note gives one.
 5. **Follow each claim.** Record who made it, what re-opened it (§3.3), the states it passed through (§3.2), its steps, and whether it closed. Apply rules R1–R6.
-6. **Code the argument layer** only where the note shows a breakdown (§3.6–3.8).
+6. **Code any lens layers** your study uses, for example the argument layer only where the note shows a breakdown (§5).
 7. **Link to evidence.** Point each step, link or claim to the fieldnote passage that supports it. Quote only published text.
 8. **Check** with `python3 validate.py <file>`. Errors mean the map breaks a rule; notes mean it is worth a second look.
 
@@ -133,19 +156,7 @@ Every domain's screen lanes have one of three roles. The role of an AI step foll
 
 {table(CORE['ai_positions'], ("AI position in the episode", "Meaning"))}
 
-### 3.6 Toulmin elements
-
-{table(CORE['toulmin'], ("Element", "Meaning"))}
-
-### 3.7 Breakdown status
-
-{table(CORE['argument_status'], ("Status", "Meaning"))}
-
-### 3.8 Repair labor
-
-{table(CORE['labor'], ("Code", "Labor"))}
-
-### 3.9 Source kinds
+### 3.6 Source kinds
 
 {table(CORE['source_kinds'], ("Kind", "Meaning"))}
 
@@ -165,7 +176,23 @@ A new setting needs only a new file in `domains/`. Copy an existing one and answ
 Then run `python3 make_editor_schema.py` and `python3 build_codebook.py`, and code with `--domain <name>`. The core and the rules do not change.
 
 {domains_md}
-## 5. Reading a rendered map
+## 5. Coding lenses and analysis layers
+
+The lexicon is modular. Two kinds of plug-in sit on top of the core and the setting vocabularies.
+
+- A **coding lens** (`lenses/<name>.json`) adds a layer that the researcher or the model codes while reading the note, from one theoretical perspective. It brings its own terms, coding rules and instructions for the model, and it can be switched off (`extract.py --lens`, or the checkboxes in the app). A map without the lens is complete.
+- An **analysis layer** (`tools/layers/<name>.py`) is computed from a map by fixed rules and never written into it, so it re-runs on any corrected version. Each declares the lens it operationalizes and, if it reads a coding lens, which one it needs. Run them with `python3 analyse.py` or tick them in the app.
+
+{lenses_md}
+### Analysis layers in this release
+
+| Layer | Question | Theoretical lens | Needs |
+| --- | --- | --- | --- |
+{layers_md}
+
+To add an analysis layer, copy `tools/layers/reachability.py`, change the rules, and give it a new name; the app and `analyse.py` find it automatically. To add a coding lens, copy `lenses/argumentation.json` and add its field to `schema/diagram.schema.json`.
+
+## 6. Reading a rendered map
 
 `tools/render.py` draws a map two ways: **screens** (one column per lane, left to right) and **escalation rows** (`--layout levels`, the notebook layout, one row per level of checking).
 
@@ -178,14 +205,15 @@ Then run `python3 make_editor_schema.py` and `python3 build_codebook.py`, and co
 | Solid arrow | Action |
 | Dashed red arrow | Doubt |
 | Dotted purple arrow | Institutional influence |
-| [R] [C] [A] [I] | Repair labor at that step |
+| [R] [C] [A] [I] | Argumentation labor at that step |
 | “shows: …” | What the AI displayed |
 | “PAC · CL” | In escalation rows: system shorthand and lane |
 
-## 6. Changes
+## 7. Changes
 
 | Version | Change |
 | --- | --- |
+| 1.3 | Plug-in model: argumentation moved out of the core into the first coding lens; analysis layers added, with reachability and labor by screen as the first two; activities counted as independent checks listed in each setting. |
 | 1.2 | Legal work added as a second extension domain with a synthetic example; extension examples relabelled as synthetic; product names replaced with generic ones and the gold set reduced to the three published vignettes, to protect the field site. |
 | 1.1 | Lexicon split into a domain-neutral core and domain vocabularies; software development added as a second domain with a worked example; lane roles and AI roles make AI position work in any setting. |
 | 1.0 | Every term defined; rules R1–R6 stated and enforced; Case 3 and Case 1 recoded; escalation levels assigned. |

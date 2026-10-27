@@ -1,8 +1,9 @@
 """Shared helpers: load the core lexicon and domain vocabularies, validate maps.
 
 The lexicon has two parts:
-  schema/core.json        domain-neutral terms (links, claim states, triggers, argument)
+  schema/core.json        domain-neutral terms (links, claim states, triggers)
   domains/<name>.json     one setting's screens, systems, activities and AI models
+  lenses/<name>.json      optional coding lenses: theory-specific layers (e.g. argumentation)
 
 Each map names its domain in a "domain" field (default: radiology).
 """
@@ -30,10 +31,30 @@ def domain(name=DEFAULT_DOMAIN):
     return json.loads(path.read_text())
 
 
+def lens_names():
+    return sorted(p.stem for p in (ROOT / "lenses").glob("*.json"))
+
+
+@lru_cache(maxsize=None)
+def lens(name):
+    path = ROOT / "lenses" / f"{name}.json"
+    if not path.exists():
+        raise ValueError(f"unknown lens '{name}' (available: {', '.join(lens_names())})")
+    return json.loads(path.read_text())
+
+
+def lenses_of(diagram):
+    """Coding lenses a map uses: those whose layer field the map contains."""
+    return [n for n in lens_names() if lens(n)["adds"]["map_field"] in diagram]
+
+
 @lru_cache(maxsize=None)
 def vocab(name=DEFAULT_DOMAIN):
-    """Core and domain terms merged into one dictionary."""
-    return {**CORE, **domain(name)}
+    """Core, domain and lens terms merged into one dictionary."""
+    terms = {}
+    for n in lens_names():
+        terms.update(lens(n)["terms"])
+    return {**CORE, **terms, **domain(name)}
 
 
 def domain_of(diagram):

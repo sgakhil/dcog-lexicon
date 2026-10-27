@@ -9,7 +9,7 @@ Usage: python3 build_site.py [--repo https://github.com/you/dcog-lexicon]
 import argparse
 import json
 
-from lexicon import CORE, ROOT, domain, domain_names, load
+from lexicon import CORE, ROOT, domain, domain_names, lens, lens_names, load
 
 # The site shows the three radiology vignettes from fieldwork (one per AI position); the full
 # gold set stays in the repository.
@@ -28,11 +28,20 @@ def main():
                 for n, D in domains.items()}
     data = {
         "core": CORE,
+        "lenses": {n: lens(n) for n in lens_names()},
         "domains": domains,
         "gold": [load(ROOT / "gold" / f"{g}.json") for g in GOLD_ORDER],
         "examples": examples,
         "example_prediction": load(ROOT / "examples" / "vignette3_predicted_example.json"),
     }
+    # analysis layers: the page cannot run Python, so results are computed here for every published map
+    from layers import describe, run_map_layers
+    published = data["gold"] + [e["map"] for n, e in examples.items() if n != "radiology"]
+    data["layers"] = [d for d in describe() if d["scope"] == "map"]
+    data["layer_results"] = {m["id"]: run_map_layers(m) for m in published}
+    from compare_episodes import compare as compare_episodes
+    data["episode_pairs"] = {f"{x['id']}|{y['id']}": compare_episodes(x, y)
+                             for x in published for y in published if x["id"] != y["id"]}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     html = (ROOT / "site" / "template.html").read_text()
     html = html.replace("/*MAPDRAW*/", (ROOT / "site" / "mapdraw.js").read_text())

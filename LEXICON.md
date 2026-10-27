@@ -1,6 +1,6 @@
 # The dcog lexicon: codebook
 
-Version 1.2. Anonymous authors (under review).
+Version 1.3. Anonymous authors (under review).
 
 The lexicon is a notation for drawing **activity maps** of human–AI work from ethnographic fieldnotes: who or what did each step, on which screen, how one step led to the next, and what happened to each claim along the way. It grew out of a cognitive ethnography of AI-augmented radiology (2024–2026), where it began as a legend in the first author's fieldnotes.
 
@@ -25,7 +25,7 @@ Each map has three layers.
 
 1. **Workflow.** The steps, the software each used, the screen it happened on, and typed links between steps.
 2. **Claims.** Each claim made during the episode (a finding, a diagnosis, a fix), who made it (person, AI or both), and the states it passed through before it closed or was left open.
-3. **Argument** (optional). Where the reasoning behind a claim broke down, in Toulmin's terms, and the work the person did to repair it.
+3. **Coding lenses** (optional). Extra layers that apply one theory, switched on per study. The first, **argumentation**, records where the reasoning behind a claim broke down, in Toulmin's terms, and the argumentation labor the person did to keep it standing, a largely invisible kind of work (§5).
 
 ## 2. How to code an episode
 
@@ -34,7 +34,7 @@ Each map has three layers.
 3. **Assign levels.** Level 0 is the ordinary path. When doubt sends the person to further checking, those steps go one level down. In the original notebook each level began after a “why?”.
 4. **Link the steps** with `action`, `doubt` or `institutional` links (§3.1). Add a short label where the note gives one.
 5. **Follow each claim.** Record who made it, what re-opened it (§3.3), the states it passed through (§3.2), its steps, and whether it closed. Apply rules R1–R6.
-6. **Code the argument layer** only where the note shows a breakdown (§3.6–3.8).
+6. **Code any lens layers** your study uses, for example the argument layer only where the note shows a breakdown (§5).
 7. **Link to evidence.** Point each step, link or claim to the fieldnote passage that supports it. Quote only published text.
 8. **Check** with `python3 validate.py <file>`. Errors mean the map breaks a rule; notes mean it is worth a second look.
 
@@ -110,39 +110,7 @@ Every domain's screen lanes have one of three roles. The role of an AI step foll
 | `triage_and_decision_support` | AI acts both before and during the work. |
 | `decision_support_and_second_opinion` | AI acts both during the work and after it. |
 
-### 3.6 Toulmin elements
-
-| Element | Meaning |
-| --- | --- |
-| `claim` | The conclusion asserted (a finding, a diagnosis, a fix). |
-| `data` | The evidence the claim rests on. |
-| `warrant` | Why the data supports the claim. |
-| `backing` | What makes the warrant trustworthy (for an AI, how it was validated or trained). |
-| `qualifier` | How strongly the claim is held (priority, confidence). |
-| `rebuttal` | Conditions under which the claim would not hold. |
-
-### 3.7 Breakdown status
-
-| Status | Meaning |
-| --- | --- |
-| `missing` | The element is not given at all (e.g. a flag with no reason). |
-| `ambiguous` | The element is given but can be read more than one way. |
-| `opaque` | The element exists but cannot be inspected. |
-| `absent` | The reader would expect it and it is not there. |
-| `unstable` | The element changes over time or between cases (e.g. after a model update). |
-| `expanded` | The reader adds more of this element than usual (e.g. extra rebuttals). |
-| `persistent` | The element stays open after sign-off (e.g. a rebuttal carried into the report). |
-
-### 3.8 Repair labor
-
-| Code | Labor |
-| --- | --- |
-| `R` | Reconstructive: reverse-engineering a missing warrant |
-| `C` | Comparative: testing own judgment against the machine, case by case |
-| `A` | Adjudicative: deciding to trust or dismiss under false flags, drift, alerts |
-| `I` | Integrative: synthesising machine output with history, physiology, trajectory |
-
-### 3.9 Source kinds
+### 3.6 Source kinds
 
 | Kind | Meaning |
 | --- | --- |
@@ -231,6 +199,8 @@ Base case. Developed in 25 months of cognitive ethnography in a U.S. academic ra
 
 **What counts as an independent check here:** Priors, other views or series, measurements against priors, patient history, a colleague, a reference image.
 
+**Activities counted as independent checks** (used by the reachability analysis layer): `Search priors`, `Compare prior volumes`, `Review patient history`, `Look up reference images`, `Message colleague`.
+
 **Worked example:** `examples/fn031_illustrative_note.txt` coded as `examples/episode_fn031.json`.
 
 ### 4.3 Legal research and drafting with AI assistants (`legal`)
@@ -284,6 +254,8 @@ Extension case: written to show how the lexicon carries to a third setting. Synt
 **Practices (optional detail):** `reading`, `typing`, `highlighting`, `searching`, `comparing versions`.
 
 **What counts as an independent check here:** Reading the case or statute itself, running a citation through the citator, the client's own documents, a colleague's or senior lawyer's reading. Reading the AI's summary of a case again is not a check.
+
+**Activities counted as independent checks** (used by the reachability analysis layer): `Read documents`, `Read source`, `Check citation`, `Find precedent`, `Ask colleague`, `Senior review`.
 
 **Worked example:** `examples/legal_synthetic_note.txt` coded as `examples/legal_episode_synthetic.json`.
 
@@ -343,9 +315,60 @@ Extension case: written to show how the lexicon carries to a second setting. Syn
 
 **What counts as an independent check here:** Running the code, running tests, CI results, documentation, a colleague's review. Re-reading the AI answer is not a check.
 
+**Activities counted as independent checks** (used by the reachability analysis layer): `Read documentation`, `Run code`, `Run tests`, `Ask colleague`, `Human review`, `CI result`.
+
 **Worked example:** `examples/dev_illustrative_note.txt` coded as `examples/dev_episode_illustrative.json`.
 
-## 5. Reading a rendered map
+## 5. Coding lenses and analysis layers
+
+The lexicon is modular. Two kinds of plug-in sit on top of the core and the setting vocabularies.
+
+- A **coding lens** (`lenses/<name>.json`) adds a layer that the researcher or the model codes while reading the note, from one theoretical perspective. It brings its own terms, coding rules and instructions for the model, and it can be switched off (`extract.py --lens`, or the checkboxes in the app). A map without the lens is complete.
+- An **analysis layer** (`tools/layers/<name>.py`) is computed from a map by fixed rules and never written into it, so it re-runs on any corrected version. Each declares the lens it operationalizes and, if it reads a coding lens, which one it needs. Run them with `python3 analyse.py` or tick them in the app.
+
+### 5.1 Coding lens: Argumentation labor (`argumentation`)
+
+Toulmin's (1958) model of argument, with argumentation labor: the largely invisible work people do to rebuild, test, weigh or complete an argument when part of it breaks down, in four kinds (reconstructive, comparative, adjudicative, integrative), as theorized in prior work on AI-augmented radiology. A coding lens: it adds a layer to the map that the researcher or the model codes while reading the note. Switch it off when your study does not use this theory; the workflow and claims layers stand on their own.
+
+**Rules:** Code a breakdown only where the note shows one; an empty list is a valid answer. Every breakdown names one Toulmin element, one status and at least one kind of labor. The same labor codes may also be put on the steps where that labor happens.
+
+| Toulmin element | Meaning |
+| --- | --- |
+| `claim` | The conclusion asserted (a finding, a diagnosis, a fix). |
+| `data` | The evidence the claim rests on. |
+| `warrant` | Why the data supports the claim. |
+| `backing` | What makes the warrant trustworthy (for an AI, how it was validated or trained). |
+| `qualifier` | How strongly the claim is held (priority, confidence). |
+| `rebuttal` | Conditions under which the claim would not hold. |
+
+| Breakdown status | Meaning |
+| --- | --- |
+| `missing` | The element is not given at all (e.g. a flag with no reason). |
+| `ambiguous` | The element is given but can be read more than one way. |
+| `opaque` | The element exists but cannot be inspected. |
+| `absent` | The reader would expect it and it is not there. |
+| `unstable` | The element changes over time or between cases (e.g. after a model update). |
+| `expanded` | The reader adds more of this element than usual (e.g. extra rebuttals). |
+| `persistent` | The element stays open after sign-off (e.g. a rebuttal carried into the report). |
+
+| Labor code | Meaning |
+| --- | --- |
+| `R` | Reconstructive: reverse-engineering a missing warrant |
+| `C` | Comparative: testing own judgment against the machine, case by case |
+| `A` | Adjudicative: deciding to trust or dismiss under false flags, drift, alerts |
+| `I` | Integrative: synthesising machine output with history, physiology, trajectory |
+
+
+### Analysis layers in this release
+
+| Layer | Question | Theoretical lens | Needs |
+| --- | --- | --- | --- |
+| `labor_by_screen` | Where is argumentation labor done, and does it follow the AI? | Argumentation labor (Toulmin) | argumentation |
+| `reachability` | Can a claim reach closure without an independent check? | Distributed cognition; epistemic trust as routing | – |
+
+To add an analysis layer, copy `tools/layers/reachability.py`, change the rules, and give it a new name; the app and `analyse.py` find it automatically. To add a coding lens, copy `lenses/argumentation.json` and add its field to `schema/diagram.schema.json`.
+
+## 6. Reading a rendered map
 
 `tools/render.py` draws a map two ways: **screens** (one column per lane, left to right) and **escalation rows** (`--layout levels`, the notebook layout, one row per level of checking).
 
@@ -358,14 +381,15 @@ Extension case: written to show how the lexicon carries to a second setting. Syn
 | Solid arrow | Action |
 | Dashed red arrow | Doubt |
 | Dotted purple arrow | Institutional influence |
-| [R] [C] [A] [I] | Repair labor at that step |
+| [R] [C] [A] [I] | Argumentation labor at that step |
 | “shows: …” | What the AI displayed |
 | “PAC · CL” | In escalation rows: system shorthand and lane |
 
-## 6. Changes
+## 7. Changes
 
 | Version | Change |
 | --- | --- |
+| 1.3 | Plug-in model: argumentation moved out of the core into the first coding lens; analysis layers added, with reachability and labor by screen as the first two; activities counted as independent checks listed in each setting. |
 | 1.2 | Legal work added as a second extension domain with a synthetic example; extension examples relabelled as synthetic; product names replaced with generic ones and the gold set reduced to the three published vignettes, to protect the field site. |
 | 1.1 | Lexicon split into a domain-neutral core and domain vocabularies; software development added as a second domain with a worked example; lane roles and AI roles make AI position work in any setting. |
 | 1.0 | Every term defined; rules R1–R6 stated and enforced; Case 3 and Case 1 recoded; escalation levels assigned. |

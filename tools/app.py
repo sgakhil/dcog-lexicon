@@ -17,8 +17,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from compare import score
+from compare_episodes import compare as compare_episodes
 from extract import extract
-from lexicon import DEFAULT_DOMAIN, ROOT, domain, domain_names, load, notes, validate
+from layers import describe, run_map_layers
+from lexicon import DEFAULT_DOMAIN, ROOT, domain, domain_names, lens, lens_names, load, notes, validate
 from llm import DEFAULT_MODEL, OLLAMA_URL
 
 NOTES, PRED = ROOT / "notes", ROOT / "predicted"
@@ -88,6 +90,8 @@ class Handler(BaseHTTPRequestHandler):
                 "domains": {n: domain(n) for n in names},
                 "examples": {n: (ROOT / domain(n)["example"]["note"]).read_text() for n in names},
                 "models": models, "ollama_error": err, "default_model": DEFAULT_MODEL,
+                "layers": [d for d in describe() if d["scope"] == "map"],
+                "lenses": [{"lens": n, "title": lens(n)["title"], "theory": lens(n)["theory"]} for n in lens_names()],
                 "library": map_library()})
         if path == "/api/map":
             rel = self.path.split("path=", 1)[-1]
@@ -113,7 +117,8 @@ class Handler(BaseHTTPRequestHandler):
             note_path = NOTES / f"{name}.txt"
             note_path.write_text(note + "\n")
             try:
-                d, errors, log = extract(note_path, req.get("model") or DEFAULT_MODEL, dom=dom)
+                d, errors, log = extract(note_path, req.get("model") or DEFAULT_MODEL, dom=dom,
+                                         lenses=req.get("lenses") if isinstance(req.get("lenses"), list) else None)
             except Exception as e:
                 return self._send(502, {"error": str(e)})
             if d is None:
@@ -128,6 +133,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"errors": ["The text is not a JSON object."], "notes": []})
             errs, nts = check(d)
             return self._send(200, {"errors": errs, "notes": nts})
+        if path == "/api/analyse":
+            d = req.get("map")
+            if not isinstance(d, dict) or validate(d):
+                return self._send(200, {"error": "Fix the map's rule errors first; layers run on valid maps."})
+            return self._send(200, {"results": run_map_layers(d, req.get("layers") or None)})
         if path == "/api/save":
             d, name = req.get("map"), safe_name(req.get("name"))
             if not isinstance(d, dict):
@@ -136,6 +146,16 @@ class Handler(BaseHTTPRequestHandler):
             out = PRED / f"{name}.json"
             out.write_text(json.dumps(d, indent=2, ensure_ascii=False))
             return self._send(200, {"saved": str(out.relative_to(ROOT)), "library": map_library()})
+        if path == "/api/compare_episodes":
+            maps = []
+            for key in ("a", "b"):
+                p = (ROOT / str(req.get(key, ""))).resolve()
+                if ROOT not in p.parents or p.suffix != ".json" or not p.exists():
+                    return self._send(404, {"error": f"Map {key.upper()} not found."})
+                maps.append(load(p))
+            if any(validate(m) for m in maps):
+                return self._send(200, {"error": "Both maps must follow the coding rules before they can be compared."})
+            return self._send(200, {"a": maps[0], "b": maps[1], "result": compare_episodes(*maps)})
         if path == "/api/compare":
             ref = (ROOT / req.get("ref", "")).resolve()
             if ROOT not in ref.parents or not ref.exists():

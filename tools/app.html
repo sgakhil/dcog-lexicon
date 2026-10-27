@@ -81,6 +81,18 @@ details > summary { cursor: pointer; font-weight: 600; }
 .lib { display: grid; gap: 2px; max-height: 260px; overflow: auto; font-size: 0.9rem; }
 .lib button { text-align: left; background: none; border: 0; padding: 4px 6px; border-radius: 4px; cursor: pointer; color: var(--fg); font: inherit; }
 .lib button:hover { background: var(--soft); }
+.layerbar { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 0.9rem; padding: 8px 10px; background: var(--soft); border: 1px solid var(--border); border-radius: 4px; }
+.layerbar b { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.layerbar label { display: inline-flex; flex-direction: row; align-items: center; gap: 6px; color: var(--fg); font-size: 0.9rem; cursor: pointer; }
+.layerres { display: grid; gap: 8px; font-size: 0.9rem; }
+.layerres h3 { font-size: 0.95rem; margin: 0; }
+.layerres .lens { font-size: 0.8rem; color: var(--muted); }
+.verdict-warn { color: #b06f00; font-weight: 600; } .verdict-ok { color: var(--ok); font-weight: 600; }
+.cmpgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 1100px) { .cmpgrid { grid-template-columns: minmax(0, 1fr); } }
+.cmpgrid h3 { font-size: 0.85rem; margin: 0 0 4px; }
+.cmpsum { display: grid; gap: 8px; font-size: 0.9rem; }
+.cmpsum ul { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
 .lib .k { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-left: 6px; }
 </style>
 </head>
@@ -101,6 +113,7 @@ details > summary { cursor: pointer; font-weight: 600; }
           <label for="domain">Setting <select id="domain"></select></label>
         </div>
         <label for="model">Model <select id="model"></select></label>
+        <div class="small" id="lensbox"></div>
         <label for="note">One episode, as written in the field
           <textarea id="note" spellcheck="false" placeholder="Paste one episode here, or open a .txt file below."></textarea>
         </label>
@@ -127,9 +140,11 @@ details > summary { cursor: pointer; font-weight: 600; }
         </span>
       </h2>
       <div class="in">
+        <div class="layerbar" id="layerbar"><b>Analysis layers</b><span class="muted small">none installed</span></div>
         <div class="plate" id="fig"><div class="empty">The draft map will appear here.</div></div>
         <div class="legend" id="legend"></div>
         <div class="problems" id="problems"></div>
+        <div class="layerres" id="layerres"></div>
         <div class="layers" id="layers"></div>
       </div>
     </section>
@@ -146,6 +161,19 @@ details > summary { cursor: pointer; font-weight: 600; }
           <button class="btn" id="dlsvg" type="button">Download drawing (SVG)</button>
         </div>
         <div class="small" id="savemsg"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Compare two episodes</h2>
+      <div class="in">
+        <p class="small muted">How do two maps differ? Within one setting, steps are matched and those found in only one map are outlined in purple. Across settings, the comparison uses argumentation labor, which every setting shares. This is not a score.</p>
+        <div class="row">
+          <label for="epa">Map A <select id="epa"></select></label>
+          <label for="epb">Map B <select id="epb"></select></label>
+          <button class="btn" id="epgo" type="button">Compare</button>
+        </div>
+        <div id="epout"></div>
       </div>
     </section>
 
@@ -168,7 +196,31 @@ details > summary { cursor: pointer; font-weight: 600; }
   "use strict";
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  let INFO = null, MD = null, current = null, mode = "lanes";
+  let INFO = null, MD = null, current = null, mode = "lanes", marks = [];
+  const layersOn = new Set();
+  function redraw() { if (current) { try { MD.draw(current, $("fig"), mode, marks); } catch (e) {} } }
+  async function runLayers() {
+    marks = []; $("layerres").innerHTML = "";
+    if (!current || !layersOn.size) { redraw(); return; }
+    const r = await api("/api/analyse", { map: current, layers: [...layersOn] });
+    if (r.error) { $("layerres").innerHTML = `<div class="muted">${esc(r.error)}</div>`; redraw(); return; }
+    let html = "";
+    Object.values(r.results).forEach((res) => {
+      marks = marks.concat(res.marks || []);
+      const meta = (INFO.layers || []).find((l) => l.name === res.layer) || {};
+      const sum = Object.entries(res.summary).map(([k, v]) => `${k.replace(/_/g, " ")}: <b>${esc(v)}</b>`).join(" · ");
+      // generic table: one column per key; lists joined, verdicts coloured, notes shown under the row
+      const R = res.rows || [], cols = R.length ? Object.keys(R[0]).filter((k) => !["note", "claim_id"].includes(k)) : [];
+      const cell = (k, v) => { const t = Array.isArray(v) ? v.join(k === "unchecked_route" ? " → " : ", ") : String(v ?? "");
+        const cls = k === "verdict" ? (/unchecked/.test(t) ? "verdict-warn" : /every/.test(t) ? "verdict-ok" : "") : "";
+        return `<td class="${cls}">${esc(t || "–")}</td>`; };
+      const rows = R.map((row) => `<tr>${cols.map((k) => cell(k, row[k])).join("")}</tr>` + (row.note ? `<tr><td colspan="${cols.length}" class="verdict-warn" style="font-weight:400">${esc(row.note)}</td></tr>` : "")).join("");
+      const head = cols.map((k) => `<th>${esc(k.replace(/_/g, " "))}</th>`).join("");
+      html += `<div><h3>${esc(meta.label || res.layer)} <span class="lens">v${esc(res.version)} · lens: ${esc(meta.lens || "")}</span></h3><div class="small">${sum}</div>
+        ${rows ? `<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>` : ""}</div>`;
+    });
+    $("layerres").innerHTML = html; redraw();
+  }
   const names = { radiology: "Radiology", software_development: "Software development", legal: "Legal" };
 
   async function api(path, body) {
@@ -180,10 +232,12 @@ details > summary { cursor: pointer; font-weight: 600; }
   function show(map, errors, notes) {
     current = map;
     $("maptitle").textContent = map.title || "Draft map";
+    marks = [];
     try { MD.draw(map, $("fig"), mode); $("layers").innerHTML = MD.layersHTML(map); }
     catch (e) { $("fig").innerHTML = '<div class="empty">The map cannot be drawn yet: ' + esc(e.message) + "</div>"; $("layers").innerHTML = ""; }
     const p = (errors || []).map((e) => `<div class="e">✕ ${esc(e)}</div>`).concat((notes || []).map((n) => `<div class="n">! ${esc(n)}</div>`));
     $("problems").innerHTML = p.length ? p.join("") : '<div style="color:var(--ok)">✓ Follows every coding rule.</div>';
+    runLayers();
   }
 
   function fillLib(lib) {
@@ -194,6 +248,10 @@ details > summary { cursor: pointer; font-weight: 600; }
       const c = await api("/api/check", { map: d }); show(d, c.errors, c.notes);
       $("name").value = m.path.split("/").pop().replace(/\.json$/, "");
     }));
+    const opts = lib.map((m) => `<option value="${esc(m.path)}">${esc(m.title)} (${esc(m.kind)})</option>`).join("");
+    const keepA = $("epa").value, keepB = $("epb").value;
+    $("epa").innerHTML = opts; $("epb").innerHTML = opts;
+    if (keepA) $("epa").value = keepA; if (keepB) $("epb").value = keepB; else if (lib.length > 1) $("epb").selectedIndex = 1;
     const refs = lib.filter((m) => m.kind !== "saved");
     $("ref").innerHTML = refs.map((m) => `<option value="${esc(m.path)}">${esc(m.title)}</option>`).join("");
   }
@@ -210,13 +268,19 @@ details > summary { cursor: pointer; font-weight: 600; }
     $("ollama").textContent = INFO.ollama_error ? "Ollama not running" : `Ollama · ${INFO.models.length} model(s)`;
     if (INFO.ollama_error) setStatus("Ollama is not running. Start it (ollama serve) and reload this page. You can still open, correct and compare maps.", "err");
     fillLib(INFO.library);
+    $("lensbox").innerHTML = '<span class="muted">Coding lenses (extra layers the model codes):</span> ' + (INFO.lenses || []).map((l) =>
+      `<label style="display:inline-flex;flex-direction:row;gap:5px;align-items:center;color:var(--fg)" title="${esc(l.theory)}"><input type="checkbox" data-lens="${esc(l.lens)}" checked> ${esc(l.title)}</label>`).join(" ");
+    if ((INFO.layers || []).length) {
+      $("layerbar").innerHTML = "<b>Analysis layers</b>" + INFO.layers.map((l) => `<label title="${esc(l.label)}${l.requires.length ? " (needs the " + esc(l.requires.join(", ")) + " lens)" : ""}"><input type="checkbox" data-layer="${esc(l.name)}"> ${esc(l.name.replace(/_/g, " "))}</label>`).join("") + '<span class="muted small">computed from the map; re-run on every check</span>';
+      $("layerbar").querySelectorAll("input").forEach((cb) => cb.addEventListener("change", () => { cb.checked ? layersOn.add(cb.dataset.layer) : layersOn.delete(cb.dataset.layer); runLayers(); }));
+    }
   }
 
   $("example").addEventListener("click", () => { $("note").value = INFO.examples[$("domain").value].replace(/^\[.*?\]\s*/, ""); $("name").value = "example_" + $("domain").value; });
   $("file").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return; f.text().then((t) => { $("note").value = t; $("name").value = f.name.replace(/\.[^.]+$/, ""); }); });
   $("layout").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
     mode = b.dataset.mode; $("layout").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    if (current) MD.draw(current, $("fig"), mode);
+    redraw();
   }));
 
   $("draft").addEventListener("click", async () => {
@@ -225,7 +289,8 @@ details > summary { cursor: pointer; font-weight: 600; }
     $("draft").disabled = true; const t0 = Date.now();
     const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); setStatus(`Drafting with ${$("model").value}… ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}. The note stays on this computer.`); }, 1000);
     try {
-      const r = await api("/api/extract", { note, name: $("name").value, domain: $("domain").value, model: $("model").value });
+      const lenses = [...document.querySelectorAll("#lensbox input:checked")].map((c) => c.dataset.lens);
+      const r = await api("/api/extract", { note, name: $("name").value, domain: $("domain").value, model: $("model").value, lenses });
       if (r.error) { setStatus(r.error, "err"); return; }
       const secs = r.log && r.log.attempts ? r.log.attempts.reduce((a, x) => a + (x.total_duration_s || 0), 0).toFixed(0) : "?";
       if (!r.map) { setStatus("The model's answer could not be read: " + (r.errors || []).join("; "), "err"); return; }
@@ -250,6 +315,13 @@ details > summary { cursor: pointer; font-weight: 600; }
   $("dlsvg").addEventListener("click", () => { const s = $("fig").querySelector("svg"); if (!s) return;
     const css = getComputedStyle(document.documentElement); let txt = s.outerHTML.replace(/var\(--([a-z-]+)\)/g, (m, v) => css.getPropertyValue("--" + v).trim() || m);
     download(($("name").value || "map") + ".svg", txt, "image/svg+xml"); });
+  $("epgo").addEventListener("click", async () => {
+    const r = await api("/api/compare_episodes", { a: $("epa").value, b: $("epb").value });
+    if (r.error) { $("epout").innerHTML = `<div class="status err">${esc(r.error)}</div>`; return; }
+    $("epout").innerHTML = `<div class="cmpgrid"><div><h3>A · ${esc(r.result.a.title)}</h3><div class="plate" id="epfa"></div></div>
+      <div><h3>B · ${esc(r.result.b.title)}</h3><div class="plate" id="epfb"></div></div></div>` + MD.compareHTML(r.result);
+    MD.draw(r.a, $("epfa"), mode, r.result.marks_a); MD.draw(r.b, $("epfb"), mode, r.result.marks_b);
+  });
   $("compare").addEventListener("click", async () => {
     let d; try { d = JSON.parse($("json").value); } catch (e) { $("scores").textContent = "Fix the JSON first."; return; }
     const r = await api("/api/compare", { ref: $("ref").value, map: d });

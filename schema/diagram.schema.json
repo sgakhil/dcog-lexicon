@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:dcog-lexicon:diagram-schema",
   "title": "Activity map (dcog lexicon v1.1)",
-  "description": "One episode of human-AI work coded in three layers: workflow (screen lanes, steps, typed links), claims (the states each claim passed through) and argument (Toulmin breakdowns and repair labor). Terms come from schema/core.json and the domain file named in 'domain'; validate.py checks them.",
+  "description": "One episode of human-AI work coded in two core layers, workflow (screen lanes, steps, typed links) and claims (the states each claim passed through), plus optional coding-lens layers such as argument (Toulmin breakdowns and argumentation labor, from lenses/argumentation.json). Terms come from schema/core.json, the domain file named in 'domain' and the lens files; validate.py checks them.",
   "type": "object",
   "required": [
     "id",
@@ -172,7 +172,7 @@
                 "I"
               ]
             },
-            "description": "Argumentation labor performed here."
+            "description": "Argumentation lens (optional): argumentation labor performed at this step."
           },
           "evidence": {
             "$ref": "#/$defs/evidence"
@@ -230,7 +230,7 @@
     "routing": {
       "type": "array",
       "minItems": 1,
-      "description": "Trust-as-routing layer: each knowledge claim, who made it, and the epistemic state it was routed to.",
+      "description": "Claims layer (stored under 'routing'): each knowledge claim, who made it, and the state it was routed to.",
       "items": {
         "type": "object",
         "required": [
@@ -300,7 +300,7 @@
     },
     "argument": {
       "type": "array",
-      "description": "Argument layer: where the diagnostic argument breaks and which labor repairs it.",
+      "description": "Argumentation lens (optional): where the argument behind a claim breaks and which argumentation labor the person does to keep it standing.",
       "items": {
         "type": "object",
         "required": [

@@ -154,6 +154,22 @@ select, textarea { font: 0.95rem var(--sans); color: var(--fg); background: var(
 .layout button + button { border-left: 1px solid var(--border); }
 .layout button[aria-pressed="true"] { background: var(--link); color: var(--bg); }
 
+.layerbar { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 0.92rem; padding: 8px 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 4px; }
+.layerbar b { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.layerbar label { display: inline-flex; flex-direction: row; align-items: center; gap: 6px; color: var(--fg); font-size: 0.92rem; cursor: pointer; }
+.layerres { display: grid; gap: 12px; font-size: 0.92rem; min-width: 0; }
+.layerres:empty { display: none; }
+.layerres > div { min-width: 0; }
+.layerres h3 { font-size: 1rem; margin: 0; }
+.layerres .lens { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+.verdict-warn { color: #b06f00; font-weight: 600; } .verdict-ok { color: var(--good); font-weight: 600; }
+.cmpgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 800px) { .cmpgrid { grid-template-columns: minmax(0, 1fr); } }
+.cmpgrid.stack { grid-template-columns: minmax(0, 1fr); }
+.cmpdetails { margin-top: 10px; }
+.cmpgrid figcaption { font-weight: 600; color: var(--fg); }
+.cmpsum { display: grid; gap: 8px; font-size: 0.95rem; min-width: 0; }
+.cmpsum ul { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px 26px; font-size: 0.92rem; }
@@ -206,10 +222,10 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
     <a class="brand" href="#top">dcog-lexicon</a>
     <nav class="navlinks" aria-label="Sections">
       <a href="#overview">Overview</a>
-      <a href="#settings">Settings</a>
+      <a href="#settings">Same lexicon, any setting</a>
       <a href="#maps">Maps</a>
+      <a href="#compare-eps">Compare</a>
       <a href="#lexicon">Lexicon</a>
-      <a href="#try">Try it</a>
       <a href="#use">Use it</a>
     </nav>
     <button class="theme" id="theme" type="button" aria-label="Switch between light and dark mode">
@@ -227,7 +243,7 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
     <p class="subtitle">A lexicon and a local AI tool for mapping human–AI relations</p>
     <dl class="meta">
       <div><dt>Authors</dt><dd>Anonymous (under review)</dd></div>
-      <div><dt>Version</dt><dd>1.2 · research prototype</dd></div>
+      <div><dt>Version</dt><dd>1.3 · research prototype</dd></div>
       <div><dt>Published</dt><dd>October 2026</dd></div>
       <div><dt>Repository</dt><dd><a href="REPO_URL">Code and data</a></dd></div>
     </dl>
@@ -237,14 +253,9 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
     </div>
   </div>
 
-  <div class="callout">
-    <div class="ch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="7" width="1.5" height="5" fill="currentColor"/><circle cx="8" cy="4.6" r="1" fill="currentColor"/></svg>Note</div>
-    <div class="cb"><p>No AI model runs on this page. Every map shown here was coded by hand. Checking and scoring run in your browser with the same rules as the tools in the repository.</p></div>
-  </div>
-
   <h2 id="overview">Overview</h2>
   <div class="prose">
-    <p>Each map describes one episode, from the moment an item of work arrives to the moment its result is recorded. It has three layers: the <b>workflow</b> (steps, software, screens and how one step led to the next), the <b>claims</b> (each finding and whether it was accepted, checked, referred or set aside) and, optionally, the <b>argument</b> (where the reasoning broke down and how it was repaired).</p>
+    <p>Each map describes one episode, from the moment an item of work arrives to the moment its result is recorded. It has three layers: the <b>workflow</b> (steps, software, screens and how one step led to the next), the <b>claims</b> (each finding and whether it was accepted, checked, referred or set aside) and, optionally, the <b>argument</b> (where the reasoning broke down and the argumentation labor that kept it standing).</p>
   </div>
   <figure>
     <div class="pipe" aria-label="Pipeline">
@@ -271,21 +282,16 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
       <li><b>Built and checked:</b> the lexicon, three radiology vignettes, the checker, drawing, scoring, event-log export and the local extraction pipeline.</li>
       <li><b>Built, synthetic:</b> software development and legal work, one map each. They show the lexicon carries over; they are not fieldwork.</li>
       <li><b>Not yet tested:</b> drafts from a real model on real fieldnotes (Stage 2). No accuracy claim is made here.</li>
+      <li><b>On this page:</b> no AI model runs here. Every map shown was coded by hand; the analysis layers and comparisons were computed by the repository's tools.</li>
     </ul></div>
   </div>
 
   <h2 id="settings">Same lexicon, any setting</h2>
-  <div class="prose"><p>A core of terms stays fixed in every setting. Each setting adds a short vocabulary of its screens, software, activities and AI tools. The last column lists what you would fill in for your own field site.</p></div>
+  <div class="prose"><p>A core of terms stays fixed in every setting. Each setting adds a short vocabulary of its screens, software, activities and AI tools, and says what counts there as an independent check. The last column is what you would answer for your own field site; the full vocabularies are under <a href="#lexicon">Lexicon</a>.</p></div>
   <div class="tablewrap"><table class="compare" id="compare"></table></div>
-  <div>
-    <div class="seg" role="group" aria-label="Example setting" id="ov-dom"></div>
-    <div class="tabbody">
-      <figure><div class="plate" id="ov-fig"></div><figcaption id="ov-cap"></figcaption></figure>
-    </div>
-  </div>
 
   <h2 id="maps">Maps</h2>
-  <div class="prose"><p><b>Screens</b> places each step on the screen where it happened. <b>Escalation rows</b> follows the field notebook: a new row each time doubt sent the person to check further.</p></div>
+  <div class="prose"><p><b>Screens</b> places each step on the screen where it happened. <b>Escalation rows</b> follows the field notebook: a new row each time doubt sent the person to check further. Tick an <b>analysis layer</b> to overlay what the tool computes from the map: <i>reachability</i> marks independent checks and any route by which a claim can reach closure without one; <i>labor by screen</i> shows where argumentation labor happens.</p></div>
   <div class="controls">
     <label for="pick">Map <select id="pick"></select></label>
     <div class="layout" role="group" aria-label="Layout" id="layout">
@@ -293,12 +299,23 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
       <button type="button" data-mode="levels" aria-pressed="false">Escalation rows</button>
     </div>
   </div>
+  <div class="layerbar" id="layerbar"></div>
   <figure>
     <div class="plate" id="fig"></div>
     <figcaption id="figcap"></figcaption>
   </figure>
   <div class="legend" id="legend"></div>
+  <div class="layerres" id="layerres"></div>
   <div class="layers" id="layers"></div>
+
+  <h2 id="compare-eps">Compare two episodes</h2>
+  <div class="prose"><p>How do two maps differ? Within one setting, steps are matched by activity and screen, and those found in only one map are outlined in purple. Across settings, the comparison uses argumentation labor, which every setting shares. It gives no score: it shows how two episodes differ, which is the material for the researcher's explanation.</p></div>
+  <div class="controls">
+    <label for="epa">Map A <select id="epa"></select></label>
+    <label for="epb">Map B <select id="epb"></select></label>
+  </div>
+  <div class="cmpgrid stack"><figure><figcaption id="epca"></figcaption><div class="plate" id="epfa"></div></figure><figure><figcaption id="epcb"></figcaption><div class="plate" id="epfb"></div></figure></div>
+  <div id="epout"></div>
 
   <h2 id="lexicon">Lexicon</h2>
   <h3>Coding rules</h3>
@@ -312,6 +329,9 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
   </ol>
   <h3>Core terms</h3>
   <div id="core"></div>
+  <h3>Coding lenses and analysis layers</h3>
+  <div class="prose"><p>The lexicon is modular. A <b>coding lens</b> adds a layer the researcher or the model codes from one theoretical perspective, and can be switched off; the first is argumentation (Toulmin breakdowns and argumentation labor, the largely invisible work of keeping an argument standing). An <b>analysis layer</b> is computed from a finished map and re-runs on any corrected version; the first two are <i>reachability</i> (can a claim reach sign-off without an independent check?) and <i>labor by screen</i> (where is argumentation labor done, and does it follow the AI?). New lenses and layers are single files that the tools find automatically.</p></div>
+  <div id="lensterms"></div>
   <h3>Setting vocabularies</h3>
   <div>
     <div class="seg" role="group" aria-label="Setting" id="lex-dom"></div>
@@ -323,37 +343,6 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
   <div class="callout tip">
     <div class="ch"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a4.5 4.5 0 0 0-2.6 8.2V12h5.2V9.7A4.5 4.5 0 0 0 8 1.5z" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="5.6" y="13" width="4.8" height="1.4" fill="currentColor"/></svg>Adding your own setting</div>
     <div class="cb"><p>Answer six questions from your fieldnotes: the screens and their roles, the software and which of it is AI, the activities, the AI tools and what they show, what counts as an independent check, and one worked example. Save it as <code>domains/&lt;name&gt;.json</code> and run the tools with <code>--domain &lt;name&gt;</code>.</p></div>
-  </div>
-
-  <h2 id="try">Try it</h2>
-  <h3>A note and its map</h3>
-  <div class="prose"><p class="small muted">Real radiology notes stay private, so the radiology note is written in their style. The software and legal notes are synthetic. Each is also the example the local model sees before coding a note in that setting.</p></div>
-  <div>
-    <div class="seg" role="group" aria-label="Setting" id="try-dom"></div>
-    <div class="tabbody">
-      <div class="pair">
-        <div class="note" id="note"></div>
-        <figure><div class="plate" id="fig-note"></div><figcaption>The note coded in the lexicon, drawn in escalation rows.</figcaption></figure>
-      </div>
-    </div>
-  </div>
-  <h3>Check a draft map against a hand-coded map</h3>
-  <div class="prose"><p>This is how drafts are checked during testing. Each layer gets a score from 0 to 1, with what is missing or extra. The example draft is hand-made with typical errors. You can also paste any map written in the schema.</p></div>
-  <div class="controls">
-    <label for="ref">Hand-coded map <select id="ref"></select></label>
-    <label for="pred">Draft map <select id="pred"></select></label>
-  </div>
-  <div class="bench">
-    <div class="scores" id="scores" aria-live="polite"></div>
-    <div style="display:grid; gap:10px; min-width:0">
-      <label for="paste">Paste a map (JSON)</label>
-      <textarea id="paste" spellcheck="false"></textarea>
-      <div class="controls">
-        <button class="btn primary" id="score-paste" type="button">Check and score</button>
-        <button class="btn" id="load-example" type="button">Reset</button>
-      </div>
-      <div class="msg" id="paste-msg" aria-live="polite"></div>
-    </div>
   </div>
 
   <h2 id="use">Use it</h2>
@@ -368,6 +357,17 @@ python3 app.py      # the same, in your browser</pre>
     <button class="copy" type="button" id="copy">Copy</button>
   </div>
   <p class="small"><code>app.py</code> opens a local page in your browser: paste a fieldnote, press Draft map, correct the draft against the coding rules, and save it. It runs only on your computer. The repository also includes the codebook (<code>LEXICON.md</code>) and a step-by-step guide for researchers who do not program (<code>GUIDE.md</code>).</p>
+  <h3>A note and its map</h3>
+  <div class="prose"><p class="small muted">The kind of note the tool reads, and the map it should produce. Real radiology notes stay private, so the radiology note is written in their style; the software and legal notes are synthetic. Each is also the example the local model sees before coding a note in that setting.</p></div>
+  <div>
+    <div class="seg" role="group" aria-label="Setting" id="try-dom"></div>
+    <div class="tabbody">
+      <div class="pair">
+        <div class="note" id="note"></div>
+        <figure><div class="plate" id="fig-note"></div><figcaption>The note coded in the lexicon, drawn in escalation rows.</figcaption></figure>
+      </div>
+    </div>
+  </div>
   <div class="callout">
     <div class="ch"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Data and ethics</div>
     <div class="cb"><ul>
@@ -377,7 +377,7 @@ python3 app.py      # the same, in your browser</pre>
     </ul></div>
   </div>
   <h3>Citation</h3>
-  <p class="small">Anonymous (2026). <i>dcog-lexicon: A lexicon and local AI tool for mapping human–AI relations</i> (Version 1.2). Under review. <a href="REPO_URL">REPO_URL</a></p>
+  <p class="small">Anonymous (2026). <i>dcog-lexicon: A lexicon and local AI tool for mapping human–AI relations</i> (Version 1.3). Under review. <a href="REPO_URL">REPO_URL</a></p>
   <h3>References</h3>
   <div class="refs">
     <p>Burawoy, M. (1998). The extended case method. <i>Sociological Theory</i>, 16(1), 4–33.</p>
@@ -393,8 +393,8 @@ python3 app.py      # the same, in your browser</pre>
     <li><a href="#overview">Overview</a></li>
     <li><a href="#settings">Same lexicon, any setting</a></li>
     <li><a href="#maps">Maps</a></li>
+    <li><a href="#compare-eps">Compare two episodes</a></li>
     <li><a href="#lexicon">Lexicon</a></li>
-    <li><a href="#try">Try it</a></li>
     <li><a href="#use">Use it</a></li>
   </ul>
   <div class="other small"><a href="REPO_URL">View the repository</a></div>
@@ -457,34 +457,67 @@ python3 app.py      # the same, in your browser</pre>
   // ---------- overview: comparison table + example map
   const rows = [
     ["Where work arrives", (D) => Object.values(D.lanes).filter((l) => l.role === "queue").map((l) => l.title).join(", "), "Which screen or list hands people their next item?"],
-    ["Where it is done", (D) => Object.values(D.lanes).filter((l) => l.role === "work").map((l) => l.title).join(", "), "Which screens do they work and check on?"],
-    ["Where it is recorded", (D) => Object.values(D.lanes).filter((l) => l.role === "record").map((l) => l.title).join(", "), "Where is the result written or shipped?"],
     ["AI in the work", (D) => Object.entries(D.systems).filter(([, s]) => s.ai).map(([k]) => k).join(", "), "Which AI tools appear, and what do they show?"],
     ["An independent check", (D) => D.independent_checks, "What counts as checking a claim here?"],
-    ["Activities defined", (D) => Object.keys(D.activities).length + " (e.g. " + Object.keys(D.activities).slice(1, 4).join(", ") + ")", "What do people do, in their own words?"],
   ];
   document.getElementById("compare").innerHTML = `<thead><tr><th></th>${DNAMES.map((n) => `<th>${esc(dname(n))}<span class="badge ${n === "radiology" ? "base" : ""}">${basis(n)}</span></th>`).join("")}<th>Your setting<span class="badge">Six questions</span></th></tr></thead><tbody>` +
     rows.map(([lab, f, q]) => `<tr><td>${lab}</td>${DNAMES.map((n) => `<td>${esc(f(DOMS[n]))}</td>`).join("")}<td>${q}</td></tr>`).join("") + "</tbody>";
-  domSeg(document.getElementById("ov-dom"), (n) => {
-    const m = n === "radiology" ? DATA.gold[2] : DATA.examples[n].map; draw(m, document.getElementById("ov-fig"), "lanes");
-    document.getElementById("ov-cap").textContent = `${m.title}. ${n === "radiology" ? "From fieldwork." : "Synthetic extension case, not fieldwork."} Drawn by screen.`;
-  }, "radiology");
-
   // ---------- maps
   const allMaps = [...DATA.gold, ...DNAMES.filter((n) => n !== "radiology").map((n) => DATA.examples[n].map)].filter((m, i, a) => a.findIndex((x) => x.id === m.id) === i);
   const pick = document.getElementById("pick"), segBtns = [...document.querySelectorAll("#layout button")];
   let mode = store.get("dcog-layout") === "levels" ? "levels" : "lanes";
   DNAMES.forEach((n) => { const g = document.createElement("optgroup"); g.label = `${dname(n)} (${basis(n).toLowerCase()})`;
     allMaps.forEach((m, i) => { if ((m.domain || "radiology") === n) g.appendChild(new Option(m.title, String(i))); }); pick.appendChild(g); });
+  // analysis layers, pre-computed at build time (tools/layers, run by build_site.py)
+  const layersOn = new Set();
+  const LAYERS = DATA.layers || [], LRES = DATA.layer_results || {};
+  function layerPanel(d) {
+    let marks = [], html = "";
+    const res = LRES[d.id] || {};
+    LAYERS.filter((l) => layersOn.has(l.name)).forEach((meta) => {
+      const r = res[meta.name]; if (!r) return;
+      marks = marks.concat(r.marks || []);
+      const sum = Object.entries(r.summary).map(([k, v]) => `${esc(k.replace(/_/g, " "))}: <b>${esc(v)}</b>`).join(" · ");
+      const R = r.rows || [], cols = R.length ? Object.keys(R[0]).filter((k) => !["note", "claim_id"].includes(k)) : [];
+      const cell = (k, v) => { const t = Array.isArray(v) ? v.join(k === "unchecked_route" ? " → " : ", ") : String(v ?? "");
+        const cls = k === "verdict" ? (/unchecked/.test(t) ? "verdict-warn" : /every/.test(t) ? "verdict-ok" : "") : "";
+        return `<td class="${cls}">${esc(t || "–")}</td>`; };
+      const rows = R.map((row) => `<tr>${cols.map((k) => cell(k, row[k])).join("")}</tr>` + (row.note ? `<tr><td colspan="${cols.length}" class="verdict-warn" style="font-weight:400">${esc(row.note)}</td></tr>` : "")).join("");
+      html += `<div><h3>${esc(meta.label)} <span class="lens">v${esc(r.version)} · lens: ${esc(meta.lens)}</span></h3><div class="small">${sum}</div>` +
+        (rows ? `<div class="tablewrap"><table><thead><tr>${cols.map((k) => `<th>${esc(k.replace(/_/g, " "))}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>` : "") + "</div>";
+    });
+    document.getElementById("layerres").innerHTML = html;
+    return marks;
+  }
+  const lbar = document.getElementById("layerbar");
+  lbar.innerHTML = "<b>Analysis layers</b>" + LAYERS.map((l) => `<label title="${esc(l.label)}"><input type="checkbox" data-layer="${esc(l.name)}"> ${esc(l.name.replace(/_/g, " "))}</label>`).join("") +
+    '<span class="muted small">computed from each map by the tool; tick to overlay</span>';
+  lbar.querySelectorAll("input").forEach((cb) => cb.addEventListener("change", () => { cb.checked ? layersOn.add(cb.dataset.layer) : layersOn.delete(cb.dataset.layer); showMap(); }));
+
   function showMap() {
     const d = allMaps[+pick.value];
     segBtns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
-    draw(d, document.getElementById("fig"), mode);
+    draw(d, document.getElementById("fig"), mode, layerPanel(d));
     document.getElementById("figcap").textContent = `${dname(d.domain || "radiology")} · ${basis(d.domain || "radiology")} · AI position: ${(d.ai_position || "").replace(/_/g, " ")}`;
     document.getElementById("layers").innerHTML = layersHTML(d);
   }
   pick.addEventListener("change", showMap);
-  segBtns.forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; store.set("dcog-layout", mode); showMap(); }));
+
+  // ---------- compare two episodes (pre-computed by build_site.py with tools/compare_episodes.py)
+  const epa = document.getElementById("epa"), epb = document.getElementById("epb");
+  allMaps.forEach((m, i) => { epa.add(new Option(m.title, String(i))); epb.add(new Option(m.title, String(i))); });
+  epa.value = String(allMaps.findIndex((m) => m.id === "vignette2_decision_support"));
+  epb.value = String(allMaps.findIndex((m) => m.id === "vignette3_second_opinion"));
+  function showPair() {
+    const a = allMaps[+epa.value], b = allMaps[+epb.value], out = document.getElementById("epout");
+    document.getElementById("epca").textContent = "A · " + a.title; document.getElementById("epcb").textContent = "B · " + b.title;
+    const r = (DATA.episode_pairs || {})[a.id + "|" + b.id];
+    draw(a, document.getElementById("epfa"), mode, r ? r.marks_a : []); draw(b, document.getElementById("epfb"), mode, r ? r.marks_b : []);
+    out.innerHTML = r ? MD.compareHTML(r, true) : '<p class="small muted">Pick two different maps.</p>';
+  }
+  epa.addEventListener("change", showPair); epb.addEventListener("change", showPair);
+  showPair();
+  segBtns.forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; store.set("dcog-layout", mode); showMap(); showPair(); }));
   showMap();
 
   // ---------- lexicon
@@ -496,8 +529,10 @@ python3 app.py      # the same, in your browser</pre>
     ["Links", "how one step leads to the next", tbl(C.edge_types, "Type", "Meaning")],
     ["Triggers", "what re-opened a claim", tbl(C.triggers, "Trigger", "Meaning")],
     ["Screen roles and AI roles", "queue, work, record", tbl(C.lane_roles, "Lane role", "Meaning") + tbl(C.ai_roles, "AI role", "Meaning")],
-    ["Argument", "Toulmin breakdowns and repair labor", tbl(C.toulmin, "Element", "Meaning") + tbl(C.argument_status, "Status", "Meaning") + tbl(C.labor, "Code", "Labor")],
-  ], true);
+  ], false);
+  document.getElementById("lensterms").innerHTML = det(Object.values(DATA.lenses || {}).map((L) => [L.title, "coding lens · " + L.lens,
+    `<p class="small" style="padding:6px 10px 0">${esc(L.theory)} ${esc(L.about)}</p>` + (L.terms.toulmin ? tbl(L.terms.toulmin, "Element", "Meaning") : "") +
+    (L.terms.argument_status ? tbl(L.terms.argument_status, "Status", "Meaning") : "") + (L.terms.labor ? tbl(L.terms.labor, "Code", "Labor") : "")]), false);
   domSeg(document.getElementById("lex-dom"), (n) => {
     const D = DOMS[n];
     document.getElementById("lex-about").textContent = D.about + " Independent checks: " + D.independent_checks;
@@ -508,7 +543,7 @@ python3 app.py      # the same, in your browser</pre>
       ["Systems", Object.keys(D.systems).length + " terms", tbl(Object.fromEntries(Object.entries(D.systems).map(([k, s]) => [k, s.definition + (s.ai ? " (AI)" : "")])), "System", "What it is")],
       ["Activities", Object.keys(D.activities).length + " terms", tbl(D.activities, "Activity", "Definition", ["AI role", aiRole])],
       ["AI models", Object.keys(D.ai_models).length + " terms", tbl(D.ai_models, "Model", "Meaning")],
-    ], true);
+    ], false);
   }, "radiology");
 
   // ---------- try: note and map
@@ -518,92 +553,5 @@ python3 app.py      # the same, in your browser</pre>
     draw(ex.map, document.getElementById("fig-note"), "levels");
   }, "radiology");
 
-  // ---------- validation (mirrors tools/lexicon.py)
-  const aliasMap = {};
-  DNAMES.forEach((n) => { const m = (aliasMap[n] = {}); Object.entries(DOMS[n].activities).forEach(([c, v]) => { m[c.toLowerCase()] = c; ((v && v.aliases) || []).forEach((a) => (m[a.toLowerCase()] = c)); }); });
-  function validate(d) {
-    const E = [];
-    if (!d || typeof d !== "object") return ["The text is not a JSON object."];
-    ["title", "nodes", "edges", "routing"].forEach((k) => { if (!(k in d)) E.push(`Missing "${k}".`); });
-    if (E.length) return E;
-    const dn = d.domain || "radiology";
-    if (!DOMS[dn]) return [`Unknown domain "${dn}". Use one of: ${DNAMES.join(", ")}.`];
-    const D = DOMS[dn], al = aliasMap[dn], ids = new Set();
-    d.nodes.forEach((n, i) => {
-      if (!n.id) E.push(`Step ${i + 1} has no id.`); else if (ids.has(n.id)) E.push(`Two steps share the id "${n.id}".`); else ids.add(n.id);
-      if (!(n.activity in D.activities)) { const h = al[String(n.activity || "").toLowerCase()]; E.push(`Step ${n.id}: "${n.activity}" is not a ${dname(dn)} activity` + (h ? `; use "${h}".` : ".")); }
-      if (!(n.system in D.systems)) { const h = (D.system_aliases || {})[n.system]; E.push(`Step ${n.id}: unknown system "${n.system}"` + (h ? `; use "${h}".` : ".")); }
-      if (!(n.lane in D.lanes)) { const h = (D.lane_aliases || {})[n.lane]; E.push(`Step ${n.id}: unknown lane "${n.lane}"` + (h ? `; use "${h}".` : `; lanes are ${Object.keys(D.lanes).join(", ")}.`)); }
-    });
-    d.edges.forEach((e) => { ["from", "to"].forEach((k) => { if (!ids.has(e[k])) E.push(`Link ${e.from} → ${e.to} points to an unknown step "${e[k]}".`); });
-      if (!(e.type in C.edge_types)) E.push(`Link ${e.from} → ${e.to}: type must be action, doubt or institutional.`); });
-    if (!d.nodes.some((n) => n.entry)) E.push('No entry step. Set "entry": true on the first step.');
-    d.routing.forEach((c) => {
-      if (!Array.isArray(c.states) || !c.states.length) { E.push(`Claim ${c.claim_id} has no states.`); return; }
-      c.states.forEach((s) => { if (!(s in C.states)) E.push(`Claim ${c.claim_id}: unknown state "${s}".`); });
-      const closes = c.states[c.states.length - 1] === "provisional_acceptance";
-      if (c.closed && !closes) E.push(`Claim ${c.claim_id} is closed but does not end in provisional acceptance (rule 1).`);
-      if (!c.closed && closes) E.push(`Claim ${c.claim_id} ends in provisional acceptance but is marked open (rule 1).`);
-      if (c.unexamined_agreement && (c.states.length !== 1 || c.claim_source !== "hybrid")) E.push(`Claim ${c.claim_id}: unexamined agreement needs source "hybrid" and the single state provisional acceptance (rule 3).`);
-    });
-    return E;
-  }
-
-  // ---------- scoring (mirrors tools/compare.py)
-  function f1(ref, pred) {
-    const cnt = (a) => a.reduce((m, k) => (m.set(k, (m.get(k) || 0) + 1), m), new Map());
-    const R = cnt(ref), P = cnt(pred); let tp = 0; const missing = [], extra = [];
-    R.forEach((v, k) => { const m = Math.min(v, P.get(k) || 0); tp += m; for (let i = m; i < v; i++) missing.push(k); });
-    P.forEach((v, k) => { const m = Math.min(v, R.get(k) || 0); for (let i = m; i < v; i++) extra.push(k); });
-    const p = pred.length ? tp / pred.length : 0, r = ref.length ? tp / ref.length : 0;
-    return { f: p + r ? (2 * p * r) / (p + r) : !ref.length && !pred.length ? 1 : 0, missing, extra };
-  }
-  function score(ref, pred) {
-    const al = aliasMap[ref.domain || "radiology"], key = (n) => `${al[String(n.activity).toLowerCase()] || n.activity} · ${n.lane}`;
-    const rk = Object.fromEntries(ref.nodes.map((n) => [n.id, key(n)])), pk = Object.fromEntries(pred.nodes.map((n) => [n.id, key(n)]));
-    const ua = (d) => d.routing.filter((c) => c.unexamined_agreement).map((c) => c.claim_source);
-    const path = (c) => c.states.map((s) => STATE_SHORT[s] || s).join(" → ");
-    return [
-      ["Workflow", "Steps", f1(Object.values(rk), Object.values(pk))],
-      ["Workflow", "Links", f1(ref.edges.map((e) => `${rk[e.from]} → ${rk[e.to]} (${e.type})`), pred.edges.map((e) => `${pk[e.from]} → ${pk[e.to]} (${e.type})`))],
-      ["Workflow", "AI steps", f1(ref.nodes.filter((n) => n.is_ai).map(key), pred.nodes.filter((n) => n.is_ai).map(key))],
-      ["Claims", "State paths", f1(ref.routing.map(path), pred.routing.map(path))],
-      ["Claims", "Unexamined agreement", f1(ua(ref), ua(pred))],
-      ["Argument", "Breakdowns", f1((ref.argument || []).map((b) => `${b.element}: ${b.status}`), (pred.argument || []).map((b) => `${b.element}: ${b.status}`))],
-      ["Argument", "Labor", f1((ref.argument || []).flatMap((b) => b.labor), (pred.argument || []).flatMap((b) => b.labor))],
-    ];
-  }
-  function showScores(ref, pred) {
-    let last = "";
-    document.getElementById("scores").innerHTML = score(ref, pred).map(([layer, name, s]) => {
-      const head = layer !== last ? `<div class="layerhead">${layer}</div>` : ""; last = layer;
-      const diff = [s.missing.length ? `<b>missing</b> ${s.missing.map(esc).join("; ")}` : "", s.extra.length ? `<b>extra</b> ${s.extra.map(esc).join("; ")}` : ""].filter(Boolean).join("<br>");
-      return `${head}<div class="score ${s.f < 0.6 ? "low" : ""}"><span>${name}</span><div class="meter"><i style="width:${Math.round(s.f * 100)}%"></i></div><span class="v">${s.f.toFixed(2)}</span>${diff ? `<div class="diff">${diff}</div>` : ""}</div>`;
-    }).join("");
-  }
-  const refSel = document.getElementById("ref"), predSel = document.getElementById("pred");
-  allMaps.forEach((d, i) => refSel.add(new Option(d.title, String(i))));
-  const preds = [{ title: "Example draft for Vignette 3 (hand-made, typical errors)", d: DATA.example_prediction }, ...allMaps.map((d) => ({ title: d.title, d }))];
-  preds.forEach((p, i) => predSel.add(new Option(p.title, String(i))));
-  let pasted = null;
-  function runBench() {
-    const ref = allMaps[+refSel.value];
-    showScores(ref, predSel.value === "pasted" && pasted ? pasted : preds[+predSel.value].d);
-  }
-  refSel.value = String(allMaps.findIndex((d) => d.id === "vignette3_second_opinion"));
-  predSel.value = "0";
-  refSel.addEventListener("change", runBench); predSel.addEventListener("change", runBench);
-  const paste = document.getElementById("paste"), msg = document.getElementById("paste-msg");
-  const resetPaste = () => { paste.value = JSON.stringify(DATA.example_prediction, null, 2); msg.innerHTML = ""; };
-  resetPaste();
-  document.getElementById("load-example").addEventListener("click", resetPaste);
-  document.getElementById("score-paste").addEventListener("click", () => {
-    let d; try { d = JSON.parse(paste.value); } catch (e) { msg.innerHTML = `<span class="err">The text is not valid JSON (${esc(e.message)}). Look for a missing comma, or a comma after the last item in a list.</span>`; return; }
-    const errs = validate(d);
-    if (errs.length) { msg.innerHTML = errs.map((e) => `<span class="err">${esc(e)}</span>`).join(""); return; }
-    pasted = d; if (![...predSel.options].some((o) => o.value === "pasted")) predSel.add(new Option("Your pasted map", "pasted"));
-    predSel.value = "pasted"; msg.innerHTML = '<span class="ok">The map follows the coding rules. Scores updated.</span>'; runBench();
-  });
-  runBench();
 })();
 </script>

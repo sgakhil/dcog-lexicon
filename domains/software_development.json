@@ -193,6 +193,14 @@
     "other": "Any other model; name it in detail."
   },
   "independent_checks": "Running the code, running tests, CI results, documentation, a colleague's review. Re-reading the AI answer is not a check.",
+  "check_activities": [
+    "Read documentation",
+    "Run code",
+    "Run tests",
+    "Ask colleague",
+    "Human review",
+    "CI result"
+  ],
   "example": {
     "note": "examples/dev_illustrative_note.txt",
     "map": "examples/dev_episode_illustrative.json"
