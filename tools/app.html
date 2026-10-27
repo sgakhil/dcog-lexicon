@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dcog-lexicon app</title>
+<style>
+/* Layout: a two-pane workbench in the project page's Quarto style. Left: the fieldnote.
+   Right: the draft map, its problems and its layers. Everything runs on this computer. */
+:root {
+  --bg: #ffffff; --fg: #343a40; --muted: #6c757d; --border: #dee2e6; --soft: #f8f9fa;
+  --primary: #2780e3; --primary-ink: #ffffff; --link: #2761c3;
+  --err: #b3261e; --err-bg: #fdecea; --warn: #9a6200; --warn-bg: #fff7e6; --ok: #2c7a4b; --ok-bg: #edf7f1;
+  --paper: var(--bg); --sheet: #ffffff; --ink: #24292f; --rule: #dee2e6; --ruled: #e9ecef; --margin: #c0392b;
+  --accent: #2761c3; --ai: #0f6f96; --doubt: #b3261e; --inst: #6a4f9a; --good: #2c7a4b; --lane-a: #f1f5ee; --lane-b: #edf3fa;
+  --sans: "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+  --mono: "Source Code Pro", SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e2125; --fg: #dee2e6; --muted: #9aa3ad; --border: #3a3f45; --soft: #262a2f;
+    --primary: #2b4f7a; --primary-ink: #f1f3f5; --link: #7fb2f0;
+    --err: #f08a80; --err-bg: #3a2222; --warn: #f0b44c; --warn-bg: #352c1c; --ok: #73c493; --ok-bg: #1d3027;
+    --sheet: #23272c; --ink: #e2e6eb; --rule: #3a3f45; --ruled: #2d3237; --margin: #e07a6f;
+    --accent: #8db3ea; --ai: #6cc0e0; --doubt: #f08a80; --inst: #b7a3e6; --good: #73c493; --lane-a: #232b26; --lane-b: #222a33;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--sans); }
+a { color: var(--link); }
+header { background: var(--primary); color: var(--primary-ink); }
+.bar { max-width: 1500px; margin: 0 auto; padding: 10px 18px; display: flex; gap: 10px 18px; align-items: center; flex-wrap: wrap; }
+.bar b { font-size: 1.1rem; margin-right: auto; }
+.pill { font-size: 0.85rem; padding: 2px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.5); }
+.wrap { max-width: 1500px; margin: 0 auto; padding: 18px; display: grid; grid-template-columns: minmax(300px, 420px) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+.card { border: 1px solid var(--border); border-radius: 6px; background: var(--bg); min-width: 0; }
+.card > h2 { margin: 0; font-size: 1rem; font-weight: 600; padding: 9px 14px; background: var(--soft); border-bottom: 1px solid var(--border); border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.card > .in { padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.stack { display: grid; gap: 18px; min-width: 0; }
+label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+input[type=text], select, textarea { font: 0.95rem var(--sans); color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 6px 9px; width: 100%; }
+textarea { font-family: var(--mono); font-size: 0.85rem; resize: vertical; }
+#note { min-height: 300px; line-height: 1.5; }
+#json { min-height: 280px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.row > label { flex: 1 1 140px; }
+.btn { font: 600 0.92rem var(--sans); border-radius: 4px; padding: 7px 14px; cursor: pointer; border: 1px solid var(--link); background: var(--bg); color: var(--link); }
+.btn.primary { background: var(--link); color: var(--bg); }
+.btn:disabled { opacity: .55; cursor: wait; }
+.linkbtn { background: none; border: 0; color: var(--link); cursor: pointer; font: inherit; font-size: 0.88rem; padding: 0; text-decoration: underline; }
+.small { font-size: 0.85rem; } .muted { color: var(--muted); }
+.status { font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; border-left: 4px solid var(--link); background: var(--soft); }
+.status.err { border-color: var(--err); background: var(--err-bg); }
+.status.ok { border-color: var(--ok); background: var(--ok-bg); }
+.problems { display: grid; gap: 4px; font-size: 0.9rem; }
+.problems .e { color: var(--err); } .problems .n { color: var(--warn); }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.seg button { font: 500 0.88rem var(--sans); background: var(--bg); color: var(--fg); border: 0; padding: 5px 11px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--link); color: var(--bg); }
+.plate { background: var(--sheet); border: 1px solid var(--border); border-radius: 4px; padding: 8px; overflow-x: auto; min-height: 120px; }
+.plate svg { display: block; width: 100%; height: auto; }
+.empty { color: var(--muted); padding: 40px 10px; text-align: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.82rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.mono { font-family: var(--mono); }
+.layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 22px; font-size: 0.9rem; }
+.layers h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 4px; }
+.claim { padding-block: 5px; border-top: 1px solid var(--border); display: grid; gap: 2px; }
+.path { font-family: var(--mono); font-size: 0.8rem; }
+.st-provisional_acceptance { color: var(--good); } .st-validation { color: var(--accent); } .st-consultation { color: var(--inst); } .st-deferral { color: var(--margin); }
+.flag { color: var(--doubt); font-weight: 600; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+td.v { font-family: var(--mono); text-align: right; }
+details > summary { cursor: pointer; font-weight: 600; }
+.lib { display: grid; gap: 2px; max-height: 260px; overflow: auto; font-size: 0.9rem; }
+.lib button { text-align: left; background: none; border: 0; padding: 4px 6px; border-radius: 4px; cursor: pointer; color: var(--fg); font: inherit; }
+.lib button:hover { background: var(--soft); }
+.lib .k { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-left: 6px; }
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <b>dcog-lexicon · local app</b>
+  <span class="pill" id="ollama">Checking Ollama…</span>
+  <span class="pill">Runs on this computer only</span>
+</div></header>
+
+<div class="wrap">
+  <div class="stack">
+    <section class="card">
+      <h2>Fieldnote <button class="linkbtn" id="example" type="button">Load the example note</button></h2>
+      <div class="in">
+        <div class="row">
+          <label for="name">Note ID <input type="text" id="name" value="fn001" spellcheck="false"></label>
+          <label for="domain">Setting <select id="domain"></select></label>
+        </div>
+        <label for="model">Model <select id="model"></select></label>
+        <label for="note">One episode, as written in the field
+          <textarea id="note" spellcheck="false" placeholder="Paste one episode here, or open a .txt file below."></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" id="draft" type="button">Draft map</button>
+          <label class="small" style="flex:0 1 auto">Open a .txt file <input type="file" id="file" accept=".txt,text/plain"></label>
+        </div>
+        <div class="status" id="status">Paste a note and press Draft map. On a laptop without a graphics card a draft takes one to five minutes.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Maps on this computer</h2>
+      <div class="in"><div class="lib" id="lib"></div></div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h2><span id="maptitle">Draft map</span>
+        <span class="seg" role="group" aria-label="Layout" id="layout">
+          <button type="button" data-mode="lanes" aria-pressed="true">Screens</button>
+          <button type="button" data-mode="levels" aria-pressed="false">Escalation rows</button>
+        </span>
+      </h2>
+      <div class="in">
+        <div class="plate" id="fig"><div class="empty">The draft map will appear here.</div></div>
+        <div class="legend" id="legend"></div>
+        <div class="problems" id="problems"></div>
+        <div class="layers" id="layers"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Correct and save</h2>
+      <div class="in">
+        <p class="small muted">Edit the map below (the codebook, LEXICON.md, lists every allowed term), then re-check. The drawing and the problem list update.</p>
+        <textarea id="json" spellcheck="false" placeholder="The map's JSON appears here after drafting."></textarea>
+        <div class="row">
+          <button class="btn" id="recheck" type="button">Re-check and redraw</button>
+          <button class="btn primary" id="save" type="button">Save to predicted/</button>
+          <button class="btn" id="dljson" type="button">Download JSON</button>
+          <button class="btn" id="dlsvg" type="button">Download drawing (SVG)</button>
+        </div>
+        <div class="small" id="savemsg"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Compare with a hand-coded map</h2>
+      <div class="in">
+        <div class="row">
+          <label for="ref">Hand-coded map <select id="ref"></select></label>
+          <button class="btn" id="compare" type="button">Score this map</button>
+        </div>
+        <div id="scores" class="small muted">Scores each layer from 0 to 1 against the map you pick.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="/mapdraw.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  let INFO = null, MD = null, current = null, mode = "lanes";
+  const names = { radiology: "Radiology", software_development: "Software development", legal: "Legal" };
+
+  async function api(path, body) {
+    const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+    return r.json();
+  }
+  function setStatus(text, kind) { const s = $("status"); s.className = "status" + (kind ? " " + kind : ""); s.textContent = text; }
+
+  function show(map, errors, notes) {
+    current = map;
+    $("maptitle").textContent = map.title || "Draft map";
+    try { MD.draw(map, $("fig"), mode); $("layers").innerHTML = MD.layersHTML(map); }
+    catch (e) { $("fig").innerHTML = '<div class="empty">The map cannot be drawn yet: ' + esc(e.message) + "</div>"; $("layers").innerHTML = ""; }
+    const p = (errors || []).map((e) => `<div class="e">✕ ${esc(e)}</div>`).concat((notes || []).map((n) => `<div class="n">! ${esc(n)}</div>`));
+    $("problems").innerHTML = p.length ? p.join("") : '<div style="color:var(--ok)">✓ Follows every coding rule.</div>';
+  }
+
+  function fillLib(lib) {
+    $("lib").innerHTML = lib.map((m, i) => `<button type="button" data-i="${i}">${esc(m.title)}<span class="k">${esc(m.kind)}</span></button>`).join("") || '<span class="muted">No maps yet.</span>';
+    $("lib").querySelectorAll("button").forEach((b) => b.addEventListener("click", async () => {
+      const m = lib[+b.dataset.i], d = await api("/api/map?path=" + encodeURIComponent(m.path));
+      $("json").value = JSON.stringify(d, null, 2);
+      const c = await api("/api/check", { map: d }); show(d, c.errors, c.notes);
+      $("name").value = m.path.split("/").pop().replace(/\.json$/, "");
+    }));
+    const refs = lib.filter((m) => m.kind !== "saved");
+    $("ref").innerHTML = refs.map((m) => `<option value="${esc(m.path)}">${esc(m.title)}</option>`).join("");
+  }
+
+  async function init() {
+    INFO = await api("/api/info");
+    MD = MapDraw(INFO.domains);
+    $("legend").innerHTML = MD.legendHTML();
+    $("domain").innerHTML = Object.keys(INFO.domains).map((n) => `<option value="${n}">${esc(names[n] || INFO.domains[n].title)}</option>`).join("");
+    $("domain").value = "radiology";
+    const models = INFO.models.length ? INFO.models : [INFO.default_model];
+    $("model").innerHTML = models.map((m) => `<option>${esc(m)}</option>`).join("");
+    if (models.includes(INFO.default_model)) $("model").value = INFO.default_model;
+    $("ollama").textContent = INFO.ollama_error ? "Ollama not running" : `Ollama · ${INFO.models.length} model(s)`;
+    if (INFO.ollama_error) setStatus("Ollama is not running. Start it (ollama serve) and reload this page. You can still open, correct and compare maps.", "err");
+    fillLib(INFO.library);
+  }
+
+  $("example").addEventListener("click", () => { $("note").value = INFO.examples[$("domain").value].replace(/^\[.*?\]\s*/, ""); $("name").value = "example_" + $("domain").value; });
+  $("file").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return; f.text().then((t) => { $("note").value = t; $("name").value = f.name.replace(/\.[^.]+$/, ""); }); });
+  $("layout").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    mode = b.dataset.mode; $("layout").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    if (current) MD.draw(current, $("fig"), mode);
+  }));
+
+  $("draft").addEventListener("click", async () => {
+    const note = $("note").value.trim();
+    if (!note) { setStatus("Paste a note first.", "err"); return; }
+    $("draft").disabled = true; const t0 = Date.now();
+    const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); setStatus(`Drafting with ${$("model").value}… ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}. The note stays on this computer.`); }, 1000);
+    try {
+      const r = await api("/api/extract", { note, name: $("name").value, domain: $("domain").value, model: $("model").value });
+      if (r.error) { setStatus(r.error, "err"); return; }
+      const secs = r.log && r.log.attempts ? r.log.attempts.reduce((a, x) => a + (x.total_duration_s || 0), 0).toFixed(0) : "?";
+      if (!r.map) { setStatus("The model's answer could not be read: " + (r.errors || []).join("; "), "err"); return; }
+      $("json").value = JSON.stringify(r.map, null, 2);
+      show(r.map, r.errors, r.notes);
+      setStatus(`Draft ready in ${secs} s (${(r.log.attempts || []).length} attempt(s)). Check it against the note before saving.`, r.errors.length ? "err" : "ok");
+    } catch (e) { setStatus("Something went wrong: " + e.message, "err"); }
+    finally { clearInterval(tick); $("draft").disabled = false; }
+  });
+
+  $("recheck").addEventListener("click", async () => {
+    let d; try { d = JSON.parse($("json").value); } catch (e) { $("problems").innerHTML = `<div class="e">✕ Not valid JSON: ${esc(e.message)}. Look for a missing comma or a comma after the last item.</div>`; return; }
+    const c = await api("/api/check", { map: d }); show(d, c.errors, c.notes);
+  });
+  $("save").addEventListener("click", async () => {
+    let d; try { d = JSON.parse($("json").value); } catch (e) { $("savemsg").textContent = "Fix the JSON first."; return; }
+    const r = await api("/api/save", { map: d, name: $("name").value });
+    $("savemsg").textContent = r.saved ? `Saved as ${r.saved}.` : r.error; if (r.library) fillLib(r.library);
+  });
+  function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+  $("dljson").addEventListener("click", () => download(($("name").value || "map") + ".json", $("json").value, "application/json"));
+  $("dlsvg").addEventListener("click", () => { const s = $("fig").querySelector("svg"); if (!s) return;
+    const css = getComputedStyle(document.documentElement); let txt = s.outerHTML.replace(/var\(--([a-z-]+)\)/g, (m, v) => css.getPropertyValue("--" + v).trim() || m);
+    download(($("name").value || "map") + ".svg", txt, "image/svg+xml"); });
+  $("compare").addEventListener("click", async () => {
+    let d; try { d = JSON.parse($("json").value); } catch (e) { $("scores").textContent = "Fix the JSON first."; return; }
+    const r = await api("/api/compare", { ref: $("ref").value, map: d });
+    if (r.error) { $("scores").textContent = r.error; return; }
+    const label = { "workflow.nodes": "Steps", "workflow.edges": "Links", "workflow.ai_nodes": "AI steps", "routing.state_paths": "Claim paths", "routing.unexamined_agreement": "Unexamined agreement", "argument.breakdowns": "Breakdowns", "argument.labor": "Labor" };
+    $("scores").className = "small";
+    $("scores").innerHTML = "<table><thead><tr><th>Layer</th><th>Score</th><th>Missing</th><th>Extra</th></tr></thead><tbody>" +
+      Object.entries(r.scores).map(([k, s]) => `<tr><td>${label[k] || k}</td><td class="v">${s.f1.toFixed(2)}</td><td>${esc(s.missing.join("; "))}</td><td>${esc(s.extra.join("; "))}</td></tr>`).join("") + "</tbody></table>";
+  });
+  init();
+})();
+</script>
+</body>
+</html>

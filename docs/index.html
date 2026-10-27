@@ -370,10 +370,11 @@ footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.
 cd dcog-lexicon/tools
 python3 validate.py ../gold/*.json
 python3 render.py ../gold/*.json --layout levels
-python3 extract.py note.txt --domain legal</pre>
+python3 extract.py note.txt --domain legal
+python3 app.py      # the same, in your browser</pre>
     <button class="copy" type="button" id="copy">Copy</button>
   </div>
-  <p class="small">The repository includes the codebook (<code>LEXICON.md</code>) and a step-by-step guide for researchers who do not program (<code>GUIDE.md</code>).</p>
+  <p class="small"><code>app.py</code> opens a local page in your browser: paste a fieldnote, press Draft map, correct the draft against the coding rules, and save it. It runs only on your computer. The repository also includes the codebook (<code>LEXICON.md</code>) and a step-by-step guide for researchers who do not program (<code>GUIDE.md</code>).</p>
   <div class="callout">
     <div class="ch"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Data and ethics</div>
     <div class="cb"><ul>
@@ -456,6 +457,13 @@ python3 extract.py note.txt --domain legal</pre>
     onPick(initial);
   }
 
+  /* Map drawing shared by the project page (site/template.html) and the local app (tools/app.py).
+   MapDraw(domains) returns draw(map, element, "lanes"|"levels"), legendHTML() and layersHTML(map). */
+function MapDraw(DOMS) {
+  "use strict";
+  const STATE_SHORT = { provisional_acceptance: "accept", validation: "validate", consultation: "consult", deferral: "defer" };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const domOf = (d) => DOMS[d.domain || "radiology"] || DOMS.radiology;
   // ---------- drawing
   const NODE_W = 196, LINE_H = 13.5;
   function wrap(text, max) {
@@ -570,7 +578,7 @@ python3 extract.py note.txt --domain legal</pre>
 
   // legend
   const sw = (inner) => `<svg width="40" height="18" viewBox="0 0 40 18" aria-hidden="true">${inner}</svg>`;
-  document.getElementById("legend").innerHTML = [
+  const legendHTML = () => [
     [sw('<rect x="2" y="2" width="36" height="14" rx="4" fill="var(--sheet)" stroke="var(--ink)" stroke-width="2.2"/>'), "entry"],
     [sw('<rect x="1" y="1" width="38" height="16" rx="5" fill="none" stroke="var(--ink)"/><rect x="4" y="4" width="32" height="10" rx="3" fill="var(--sheet)" stroke="var(--ink)"/>'), "claim closes"],
     [sw('<rect x="2" y="2" width="36" height="14" rx="1" fill="var(--sheet)" stroke="var(--ai)" stroke-dasharray="4 3"/>'), "AI in a queue"],
@@ -583,12 +591,17 @@ python3 extract.py note.txt --domain legal</pre>
 
   function layersHTML(d) {
     const claims = d.routing.map((c) => `<div class="claim"><div><b>${esc(c.claim)}</b> <span class="muted">(${esc(c.claim_source)})</span></div>
-      <div class="path">${c.states.map((s) => `<span class="st-${s}">${STATE_SHORT[s]}</span>`).join(" → ")} <span class="muted">· ${c.closed ? "closed" : "left open"}</span></div>
+      <div class="path">${c.states.map((s) => `<span class="st-${s}">${STATE_SHORT[s] || esc(s)}</span>`).join(" → ")} <span class="muted">· ${c.closed ? "closed" : "left open"}</span></div>
       ${c.unexamined_agreement ? '<div class="flag">Closed on agreement, nothing independent checked</div>' : ""}</div>`).join("");
     const arg = (d.argument || []).length ? d.argument.map((b) => `<div class="claim"><div class="path">${esc(b.element)}: ${esc(b.status)} → ${b.labor.map((l) => `[${l}]`).join(" ")}</div></div>`).join("") : '<p class="muted">Not coded.</p>';
     return `<div><h3>Claims</h3>${claims}</div><div><h3>Argument</h3>${arg}</div>
-      <div><h3>Source</h3><p>${esc(d.source.origin)}</p>${d.source.notes ? `<p class="muted" style="margin-top:6px">${esc(d.source.notes)}</p>` : ""}</div>`;
+      <div><h3>Source</h3><p>${esc((d.source || {}).origin || "Draft")}</p>${(d.source || {}).notes ? `<p class="muted" style="margin-top:6px">${esc(d.source.notes)}</p>` : ""}</div>`;
   }
+  return { draw, legendHTML, layersHTML };
+}
+
+  const MD = MapDraw(DOMS), draw = MD.draw, layersHTML = MD.layersHTML;
+  document.getElementById("legend").innerHTML = MD.legendHTML();
 
   // ---------- overview: comparison table + example map
   const rows = [

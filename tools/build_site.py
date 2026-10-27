@@ -35,6 +35,7 @@ def main():
     }
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     html = (ROOT / "site" / "template.html").read_text()
+    html = html.replace("/*MAPDRAW*/", (ROOT / "site" / "mapdraw.js").read_text())
     html = html.replace("/*DATA*/", blob).replace("REPO_URL", args.repo)
     # full standalone document for a website (GitHub Pages etc.)
     head, _, body = html.partition("<header class=\"bar\">")

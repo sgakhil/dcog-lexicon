@@ -43,6 +43,28 @@ After changing the gold set, a domain file or the core, refresh the generated fi
 python3 build_codebook.py && python3 build_site.py && python3 make_editor_schema.py
 ```
 
+## Use it from the browser instead of the terminal
+
+From the `tools` folder run:
+
+```
+python3 app.py
+```
+
+Your browser opens a page at `http://localhost:8765`. Paste a fieldnote (or open a .txt file), choose the setting and the model, and press **Draft map**. The draft is drawn on the page with a list of any coding rules it breaks. You can correct it in the box below, re-check, save it to `predicted/`, download the drawing, or score it against a hand-coded map.
+
+The app runs only on your computer: it does not listen on the network, the model is your local Ollama, and notes are saved only in `notes/`, which is never uploaded to git. Press Ctrl+C in the terminal to stop it.
+
+## Test everything in one go
+
+Once Ollama and a model are installed, run from the `tools` folder:
+
+```
+python3 selftest.py
+```
+
+It checks the setup, runs the tools without AI, has the model draft a map for each setting's worked example, and then runs a held-out test: the model writes a synthetic note from each radiology vignette and codes it without seeing the vignette. It writes `test_run/REPORT.md` with every result and score. On a laptop without a graphics card, allow 20–60 minutes; `python3 selftest.py --quick` takes a few minutes.
+
 ## What the AI parts do
 
 | Tool | What goes in | What comes out | Why |

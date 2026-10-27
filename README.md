@@ -56,17 +56,20 @@ schema/core.json             Domain-neutral terms
 schema/diagram.schema.json   JSON Schema for one map
 domains/                     One vocabulary per setting (radiology, software_development, legal)
 gold/                        Three hand-coded radiology vignettes (answer keys)
-examples/                    One note and map per domain (radiology illustrative, software and legal synthetic); a hand-made flawed prediction
+examples/                    One note and map per domain (radiology illustrative, software and legal synthetic), a synthetic overnight head-CT test, and a hand-made flawed prediction
 renders/                     Every map drawn in both layouts (PNG and SVG)
 eventlog.csv                 The maps as an event log for process-mining tools
 docs/index.html              Standalone project page (served as the website)
 site/template.html           Source of the project page
+site/mapdraw.js              Map drawing shared by the project page and the app
+tools/app.py, app.html       Local browser app: paste a note, draft, correct, save, compare
 tools/extract.py             Fieldnote to draft map, with a local model (--domain)
 tools/validate.py            Checks a map against the schema, its domain and the rules
 tools/render.py              Draws a map (screen lanes, or notebook-style escalation rows)
 tools/compare.py             Scores one map against another, layer by layer
 tools/synthesize.py          Synthetic fieldnotes with known answers, for testing extraction
 tools/evaluate.py            Scores a folder of drafts against their answer keys
+tools/selftest.py            Checks the whole toolkit on your computer, including the local model
 tools/export_eventlog.py     Exports maps as an event log (CSV)
 tools/build_codebook.py      Regenerates LEXICON.md from core.json and domains/
 tools/build_site.py          Regenerates docs/index.html

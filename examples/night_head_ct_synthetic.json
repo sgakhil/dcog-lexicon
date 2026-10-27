@@ -1,0 +1,275 @@
+{
+  "id": "night_head_ct_synthetic",
+  "domain": "radiology",
+  "title": "Resident, overnight: AI-flagged head CT, then two chest X-rays",
+  "source": {
+    "kind": "synthetic",
+    "origin": "Synthetic test note for the app (radiology); not fieldwork data",
+    "fieldnote_id": "examples/night_head_ct_note.txt",
+    "coder": "authors"
+  },
+  "ai_position": "triage_and_decision_support",
+  "nodes": [
+    {
+      "id": "ai_triage",
+      "activity": "AI triage",
+      "detail": "head CT moved to the top",
+      "system": "Vendor AI",
+      "lane": "L",
+      "is_ai": true,
+      "ai_model": "triage",
+      "ai_output": "possible intracranial hemorrhage",
+      "entry": true,
+      "level": 0
+    },
+    {
+      "id": "worklist",
+      "activity": "Worklist",
+      "detail": "leaves the chest X-rays",
+      "system": "PACS",
+      "lane": "L",
+      "level": 0
+    },
+    {
+      "id": "read",
+      "activity": "Read main image",
+      "detail": "scrolls the axial slices",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 0
+    },
+    {
+      "id": "overlay",
+      "activity": "AI overlay",
+      "detail": "'bleed or the tentorium?'",
+      "system": "Vendor AI",
+      "lane": "CR",
+      "is_ai": true,
+      "ai_model": "widget",
+      "ai_output": "thin crescent outlined on the left",
+      "level": 0
+    },
+    {
+      "id": "reexamine",
+      "activity": "Re-examine image",
+      "detail": "changes the window, scrolls again",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 1,
+      "labor": [
+        "R"
+      ]
+    },
+    {
+      "id": "priors",
+      "activity": "Search priors",
+      "detail": "CT from three months ago: nothing",
+      "system": "PACS",
+      "lane": "CR",
+      "level": 1,
+      "labor": [
+        "C"
+      ]
+    },
+    {
+      "id": "history",
+      "activity": "Review patient history",
+      "detail": "82, blood thinners, fell this evening",
+      "system": "EHR",
+      "lane": "L",
+      "level": 2,
+      "labor": [
+        "I"
+      ]
+    },
+    {
+      "id": "colleague",
+      "activity": "Message colleague",
+      "detail": "calls attending A4, who agrees",
+      "system": "Chat",
+      "lane": "L",
+      "level": 2
+    },
+    {
+      "id": "dictate",
+      "activity": "Dictate report",
+      "detail": "small subdural, with comparison",
+      "system": "Dictation",
+      "lane": "R",
+      "level": 0
+    },
+    {
+      "id": "critical",
+      "activity": "Flag critical result",
+      "system": "Dictation",
+      "lane": "R",
+      "level": 0
+    },
+    {
+      "id": "signoff",
+      "activity": "Sign off report",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    },
+    {
+      "id": "cxr_ai",
+      "activity": "AI triage",
+      "detail": "chest X-rays not flagged",
+      "system": "Vendor AI",
+      "lane": "L",
+      "is_ai": true,
+      "ai_model": "triage",
+      "ai_output": "No finding (both)",
+      "level": 0
+    },
+    {
+      "id": "cxr_column",
+      "activity": "Check AI result column",
+      "detail": "back to the two chest X-rays",
+      "system": "PACS",
+      "lane": "L",
+      "level": 0
+    },
+    {
+      "id": "cxr_signoff",
+      "activity": "Sign off report",
+      "detail": "a few seconds each; priors not opened",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "ai_triage",
+      "to": "worklist",
+      "type": "action",
+      "label": "jumps to the top"
+    },
+    {
+      "from": "worklist",
+      "to": "read",
+      "type": "action"
+    },
+    {
+      "from": "read",
+      "to": "overlay",
+      "type": "action"
+    },
+    {
+      "from": "overlay",
+      "to": "reexamine",
+      "type": "doubt",
+      "label": "bleed or tentorium?"
+    },
+    {
+      "from": "reexamine",
+      "to": "priors",
+      "type": "doubt"
+    },
+    {
+      "from": "priors",
+      "to": "history",
+      "type": "doubt",
+      "label": "still not sure"
+    },
+    {
+      "from": "history",
+      "to": "colleague",
+      "type": "action",
+      "label": "that changes things"
+    },
+    {
+      "from": "colleague",
+      "to": "dictate",
+      "type": "action",
+      "label": "A4 agrees"
+    },
+    {
+      "from": "dictate",
+      "to": "critical",
+      "type": "action"
+    },
+    {
+      "from": "critical",
+      "to": "signoff",
+      "type": "action"
+    },
+    {
+      "from": "signoff",
+      "to": "cxr_column",
+      "type": "action",
+      "label": "back to the X-rays"
+    },
+    {
+      "from": "cxr_ai",
+      "to": "cxr_column",
+      "type": "action"
+    },
+    {
+      "from": "cxr_column",
+      "to": "cxr_signoff",
+      "type": "action",
+      "label": "no finding"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c_bleed",
+      "claim": "Small left subdural hemorrhage",
+      "claim_source": "hybrid",
+      "trigger": "ai_generated_doubt",
+      "states": [
+        "validation",
+        "consultation",
+        "provisional_acceptance"
+      ],
+      "closed": true,
+      "nodes": [
+        "ai_triage",
+        "overlay",
+        "reexamine",
+        "priors",
+        "history",
+        "colleague",
+        "signoff"
+      ]
+    },
+    {
+      "claim_id": "c_cxr",
+      "claim": "Chest X-rays: no finding",
+      "claim_source": "hybrid",
+      "trigger": "none",
+      "states": [
+        "provisional_acceptance"
+      ],
+      "closed": true,
+      "unexamined_agreement": true,
+      "nodes": [
+        "cxr_ai",
+        "cxr_column",
+        "cxr_signoff"
+      ]
+    }
+  ],
+  "argument": [
+    {
+      "element": "data",
+      "status": "ambiguous",
+      "labor": [
+        "R",
+        "C",
+        "I"
+      ],
+      "nodes": [
+        "overlay",
+        "reexamine",
+        "priors",
+        "history"
+      ]
+    }
+  ]
+}
