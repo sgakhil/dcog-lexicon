@@ -1,0 +1,246 @@
+{
+  "id": "dev_episode_illustrative",
+  "domain": "software_development",
+  "title": "Developer: a date-parsing fix with AI completion, AI chat and AI review",
+  "source": {
+    "kind": "synthetic",
+    "origin": "Synthetic note written to show the lexicon in a second setting (extension case); not fieldwork data",
+    "fieldnote_id": "examples/dev_illustrative_note.txt",
+    "coder": "authors (illustration, drafted with an AI assistant)",
+    "notes": "Shows the same claim and check structure as the radiology maps: an AI fix accepted because it 'looks right', closed without running anything, and later re-opened by a colleague and checked with tests.",
+    "observation": {
+      "informant_role": "other",
+      "setting": "software team (illustrative)"
+    }
+  },
+  "ai_position": "decision_support_and_second_opinion",
+  "nodes": [
+    {
+      "id": "ticket",
+      "activity": "Pick up ticket",
+      "detail": "dates fail to parse in an import job",
+      "system": "Issue tracker",
+      "lane": "T",
+      "entry": true,
+      "level": 0
+    },
+    {
+      "id": "read",
+      "activity": "Read code",
+      "detail": "the parser function",
+      "system": "IDE",
+      "lane": "E",
+      "level": 0
+    },
+    {
+      "id": "completion",
+      "activity": "Accept inline suggestion",
+      "detail": "tabs to accept a whole parsing block",
+      "system": "Code assistant",
+      "lane": "E",
+      "is_ai": true,
+      "ai_model": "inline_completion",
+      "level": 0
+    },
+    {
+      "id": "run",
+      "activity": "Run code",
+      "detail": "import throws on one sample file",
+      "system": "Terminal",
+      "lane": "X",
+      "level": 0
+    },
+    {
+      "id": "ask_ai",
+      "activity": "Ask AI assistant",
+      "detail": "pastes the error, asks why",
+      "system": "AI chat",
+      "lane": "S",
+      "is_ai": true,
+      "ai_model": "chat_assistant",
+      "ai_output": "a fix and a short explanation",
+      "level": 1
+    },
+    {
+      "id": "paste",
+      "activity": "Paste AI answer",
+      "detail": "'Yeah, that looks right'; nothing rerun",
+      "system": "IDE",
+      "lane": "E",
+      "level": 1
+    },
+    {
+      "id": "pr",
+      "activity": "Open pull request",
+      "system": "Git host",
+      "lane": "P",
+      "level": 0
+    },
+    {
+      "id": "ai_review",
+      "activity": "AI review comment",
+      "system": "AI review bot",
+      "lane": "P",
+      "is_ai": true,
+      "ai_model": "ai_review",
+      "ai_output": "No issues found",
+      "level": 0
+    },
+    {
+      "id": "review",
+      "activity": "Human review",
+      "detail": "R1 asks about two-digit years",
+      "system": "Git host",
+      "lane": "P",
+      "level": 0
+    },
+    {
+      "id": "tests",
+      "activity": "Run tests",
+      "detail": "one test fails on that case",
+      "system": "Terminal",
+      "lane": "X",
+      "level": 1
+    },
+    {
+      "id": "fix",
+      "activity": "Write code",
+      "detail": "writes the fix herself; tests pass",
+      "system": "IDE",
+      "lane": "E",
+      "level": 1
+    },
+    {
+      "id": "merge",
+      "activity": "Merge",
+      "detail": "after R1 approves",
+      "system": "Git host",
+      "lane": "P",
+      "closes_claim": true,
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "ticket",
+      "to": "read",
+      "type": "action"
+    },
+    {
+      "from": "read",
+      "to": "completion",
+      "type": "action"
+    },
+    {
+      "from": "completion",
+      "to": "run",
+      "type": "action",
+      "label": "runs the import"
+    },
+    {
+      "from": "run",
+      "to": "ask_ai",
+      "type": "doubt",
+      "label": "error"
+    },
+    {
+      "from": "ask_ai",
+      "to": "paste",
+      "type": "action"
+    },
+    {
+      "from": "paste",
+      "to": "pr",
+      "type": "action",
+      "label": "looks right"
+    },
+    {
+      "from": "pr",
+      "to": "ai_review",
+      "type": "action"
+    },
+    {
+      "from": "ai_review",
+      "to": "review",
+      "type": "action"
+    },
+    {
+      "from": "review",
+      "to": "tests",
+      "type": "doubt",
+      "label": "two-digit years?"
+    },
+    {
+      "from": "tests",
+      "to": "fix",
+      "type": "doubt",
+      "label": "test fails"
+    },
+    {
+      "from": "fix",
+      "to": "merge",
+      "type": "action"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c_fix",
+      "claim": "The AI's fix solves the parsing error",
+      "claim_source": "hybrid",
+      "states": [
+        "provisional_acceptance"
+      ],
+      "trigger": "substantive_doubt",
+      "closed": true,
+      "unexamined_agreement": true,
+      "nodes": [
+        "ask_ai",
+        "paste",
+        "pr"
+      ]
+    },
+    {
+      "claim_id": "c_ready",
+      "claim": "The change is ready to merge",
+      "claim_source": "hybrid",
+      "states": [
+        "consultation",
+        "validation",
+        "provisional_acceptance"
+      ],
+      "trigger": "substantive_doubt",
+      "closed": true,
+      "nodes": [
+        "ai_review",
+        "review",
+        "tests",
+        "fix",
+        "merge"
+      ]
+    }
+  ],
+  "argument": [
+    {
+      "element": "warrant",
+      "status": "missing",
+      "labor": [
+        "R"
+      ],
+      "nodes": [
+        "ask_ai",
+        "paste"
+      ]
+    },
+    {
+      "element": "rebuttal",
+      "status": "absent",
+      "labor": [
+        "I"
+      ],
+      "nodes": [
+        "review",
+        "tests"
+      ]
+    }
+  ]
+}

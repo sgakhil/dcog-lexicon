@@ -1,0 +1,50 @@
+{
+  "domain": "legal",
+  "title": "Legal research and drafting with AI assistants",
+  "setting": "law firm, associates' offices",
+  "about": "Extension case: written to show how the lexicon carries to a third setting. Synthetic; not yet tested on fieldwork.",
+  "lanes": {
+    "M": {"title": "Matter inbox", "role": "queue", "definition": "Email and matter management: where assignments and deadlines arrive."},
+    "D": {"title": "Draft", "role": "work", "definition": "The memo, brief or contract being written, including AI drafting suggestions."},
+    "A": {"title": "AI assistant", "role": "work", "definition": "Legal AI assistant panel: questions, answers, summaries, suggested authorities."},
+    "L": {"title": "Legal sources", "role": "work", "definition": "Case-law and statute database, citator, the source documents themselves."},
+    "S": {"title": "Sign-off", "role": "record", "definition": "Review by a senior lawyer and sending to the client or filing with the court."}
+  },
+  "lane_aliases": {"Inbox": "M", "Email": "M", "Word": "D", "Memo": "D", "AI": "A", "Westlaw": "L", "Lexis": "L", "Partner": "S"},
+  "systems": {
+    "Email": {"definition": "Email and calendar.", "short": "Mail"},
+    "Matter management": {"definition": "Matter, docket and deadline system.", "short": "Mtr"},
+    "Word processor": {"definition": "Word processor or drafting tool where the document is written.", "short": "Doc"},
+    "Legal AI assistant": {"definition": "AI that answers legal questions, summarises sources and suggests authorities.", "short": "Ai", "ai": true},
+    "AI contract review": {"definition": "AI that flags clauses or issues in a set of documents.", "short": "Ai", "ai": true},
+    "Case-law database": {"definition": "Database of cases, statutes and secondary sources.", "short": "DB"},
+    "Citator": {"definition": "Tool that checks whether a case exists, is still good law and how it has been treated.", "short": "Cit"},
+    "Document management": {"definition": "Firm's store of precedents, prior memos and client documents.", "short": "DMS"},
+    "Team chat": {"definition": "Messaging with colleagues.", "short": "Chat"}
+  },
+  "system_aliases": {"Westlaw": "Case-law database", "Lexis": "Case-law database", "KeyCite": "Citator", "Shepard's": "Citator", "Outlook": "Email", "Word": "Word processor", "Teams": "Team chat"},
+  "activities": {
+    "Receive assignment": {"definition": "Take on a task from a senior lawyer or client and read what is asked.", "aliases": ["Get assignment"]},
+    "Read documents": {"definition": "Read the client's documents or the file.", "aliases": ["Review documents"]},
+    "AI issue flag": {"definition": "An AI review tool flags a clause, document or issue for attention.", "aliases": [], "ai_role": "triage"},
+    "Ask AI assistant": {"definition": "Put a legal question to an AI assistant and read its answer.", "aliases": ["Prompt AI"], "ai_role": "support"},
+    "Paste AI text": {"definition": "Copy text or citations from the AI answer into the draft.", "aliases": []},
+    "Search case law": {"definition": "Search the database for cases, statutes or commentary.", "aliases": ["Legal research"]},
+    "Read source": {"definition": "Open and read the case, statute or document itself.", "aliases": ["Read case"]},
+    "Check citation": {"definition": "Run a citation through the citator: does it exist, is it still good law.", "aliases": ["Cite-check"]},
+    "Find precedent": {"definition": "Look up a prior memo, brief or contract from the firm.", "aliases": []},
+    "Draft text": {"definition": "The lawyer's own writing or editing of the document.", "aliases": ["Write memo"]},
+    "Ask colleague": {"definition": "Ask a colleague in person or by chat.", "aliases": []},
+    "Senior review": {"definition": "A senior lawyer reviews the work and comments.", "aliases": ["Partner review"]},
+    "Send or file": {"definition": "Send the work to the client or file it. The point where a claim reaches closure.", "aliases": ["File"]}
+  },
+  "practices": {"reading": [], "typing": [], "highlighting": [], "searching": [], "comparing versions": []},
+  "ai_models": {
+    "research_assistant": "Assistant that answers legal questions and suggests authorities.",
+    "drafting_assistant": "Assistant that writes or rewrites passages.",
+    "contract_review": "Tool that flags clauses or issues across documents.",
+    "other": "Any other model; name it in detail."
+  },
+  "independent_checks": "Reading the case or statute itself, running a citation through the citator, the client's own documents, a colleague's or senior lawyer's reading. Reading the AI's summary of a case again is not a check.",
+  "example": {"note": "examples/legal_synthetic_note.txt", "map": "examples/legal_episode_synthetic.json"}
+}

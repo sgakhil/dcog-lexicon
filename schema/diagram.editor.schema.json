@@ -1,0 +1,501 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:dcog-lexicon:diagram-schema",
+  "title": "Activity map (dcog lexicon v1.1)",
+  "description": "One episode of human-AI work coded in three layers: workflow (screen lanes, steps, typed links), claims (the states each claim passed through) and argument (Toulmin breakdowns and repair labor). Terms come from schema/core.json and the domain file named in 'domain'; validate.py checks them.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "source",
+    "ai_position",
+    "nodes",
+    "edges",
+    "routing"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "domain": {
+      "type": "string",
+      "default": "radiology",
+      "description": "Name of the domain file in domains/ whose screens, systems and activities this map uses.",
+      "enum": [
+        "legal",
+        "radiology",
+        "software_development"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "kind",
+        "origin"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "case_type",
+            "vignette",
+            "session",
+            "episode",
+            "illustrative",
+            "synthetic"
+          ],
+          "description": "See core.json source_kinds."
+        },
+        "origin": {
+          "type": "string",
+          "description": "Where the hand-coded diagram comes from, e.g. a paper figure."
+        },
+        "fieldnote_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Identifier of the fieldnote this diagram codes. Null for composites."
+        },
+        "coder": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "observation": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Session header from the fieldnotes. Roles only, never names.",
+          "properties": {
+            "informant_role": {
+              "type": "string",
+              "description": "Role only, never a name (e.g. resident, attending, developer)."
+            },
+            "subspecialty": {
+              "type": "string"
+            },
+            "modality": {
+              "type": "string",
+              "description": "e.g. XR chest, CT chest"
+            },
+            "date": {
+              "type": "string",
+              "description": "YYYY-MM or YYYY-MM-DD"
+            },
+            "start_time": {
+              "type": "string"
+            },
+            "end_time": {
+              "type": "string"
+            },
+            "setting": {
+              "type": "string",
+              "description": "e.g. shared reading room"
+            }
+          }
+        }
+      }
+    },
+    "ai_position": {
+      "enum": [
+        "none",
+        "implicit_confirmatory",
+        "triage",
+        "decision_support",
+        "second_opinion",
+        "triage_and_decision_support",
+        "decision_support_and_second_opinion"
+      ],
+      "description": "Where the AI acts relative to the person's own work. See core.json ai_positions."
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "activity",
+          "system",
+          "lane"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "activity": {
+            "type": "string",
+            "description": "Activity term from the domain file.",
+            "enum": [
+              "AI issue flag",
+              "AI overlay",
+              "AI review comment",
+              "AI second opinion",
+              "AI triage",
+              "Accept inline suggestion",
+              "Ask AI assistant",
+              "Ask colleague",
+              "CI result",
+              "Check AI result column",
+              "Check citation",
+              "Compare prior volumes",
+              "Cross-check views",
+              "Decode AI flag",
+              "Deprioritise case",
+              "Dictate report",
+              "Draft text",
+              "Find precedent",
+              "Flag critical result",
+              "Flag in RIS",
+              "Human review",
+              "Look up reference images",
+              "Merge",
+              "Message colleague",
+              "Model update drift",
+              "Non-engagement alert",
+              "Notify clinician via Rad Ops",
+              "Open pull request",
+              "Paste AI answer",
+              "Paste AI text",
+              "Pick up ticket",
+              "Re-examine image",
+              "Read code",
+              "Read documentation",
+              "Read documents",
+              "Read error output",
+              "Read main image",
+              "Read source",
+              "Receive assignment",
+              "Reconstruct AI claim",
+              "Review patient history",
+              "Run code",
+              "Run tests",
+              "Search case law",
+              "Search priors",
+              "Send or file",
+              "Senior review",
+              "Sign off report",
+              "Worklist",
+              "Write code"
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "description": "Case-specific gloss, e.g. 'pneumothorax, no heatmap'."
+          },
+          "system": {
+            "type": "string",
+            "description": "System from the domain file.",
+            "enum": [
+              "AI chat",
+              "AI contract review",
+              "AI review bot",
+              "CI",
+              "Case-law database",
+              "Chat",
+              "Citator",
+              "Code assistant",
+              "Dictation",
+              "Docs and search",
+              "Document management",
+              "EHR",
+              "Email",
+              "General-purpose AI",
+              "Git host",
+              "IDE",
+              "In-house AI",
+              "Issue tracker",
+              "Legal AI assistant",
+              "Matter management",
+              "PACS",
+              "RIS",
+              "Rad Ops",
+              "Team chat",
+              "Terminal",
+              "Vendor AI",
+              "Web search",
+              "Word processor"
+            ]
+          },
+          "lane": {
+            "type": "string",
+            "description": "Screen lane from the domain file.",
+            "enum": [
+              "A",
+              "CL",
+              "CR",
+              "D",
+              "E",
+              "L",
+              "M",
+              "P",
+              "R",
+              "S",
+              "T",
+              "X"
+            ]
+          },
+          "is_ai": {
+            "type": "boolean",
+            "default": false
+          },
+          "entry": {
+            "type": "boolean",
+            "default": false
+          },
+          "closes_claim": {
+            "type": "boolean",
+            "default": false,
+            "description": "Sign-off: the point where a claim reaches epistemic closure."
+          },
+          "practices": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "choose options",
+                "comparing diff",
+                "comparing versions",
+                "confirming",
+                "cross checking",
+                "debugging",
+                "findings",
+                "highlighting",
+                "identifying",
+                "impressions",
+                "reading",
+                "scrolling",
+                "searching",
+                "switching",
+                "triage",
+                "typing",
+                "validating AI claim",
+                "zooming"
+              ]
+            },
+            "description": "Optional detail terms from the domain file."
+          },
+          "labor": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "R",
+                "C",
+                "A",
+                "I"
+              ]
+            },
+            "description": "Argumentation labor performed here."
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Escalation level: 0 = default read; each 'why?' or 'Doubts?' in the notebook opens the next level."
+          },
+          "ai_model": {
+            "type": "string",
+            "description": "For AI nodes: model key from the domain file's ai_models."
+          },
+          "ai_output": {
+            "type": "string",
+            "description": "What the AI displayed, e.g. 'No finding', 'ETT 3.4'."
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "action",
+              "doubt",
+              "institutional"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "routing": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Trust-as-routing layer: each knowledge claim, who made it, and the epistemic state it was routed to.",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_id",
+          "claim",
+          "claim_source",
+          "states",
+          "closed"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {
+            "type": "string"
+          },
+          "claim": {
+            "type": "string"
+          },
+          "claim_source": {
+            "enum": [
+              "human",
+              "ai",
+              "hybrid"
+            ]
+          },
+          "states": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "enum": [
+                "provisional_acceptance",
+                "validation",
+                "consultation",
+                "deferral"
+              ]
+            },
+            "description": "States in the order the claim passed through them. Only provisional_acceptance closes a claim."
+          },
+          "trigger": {
+            "enum": [
+              "none",
+              "substantive_doubt",
+              "ai_generated_doubt",
+              "discordance",
+              "protocol"
+            ],
+            "description": "What re-opened appraisal."
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "unexamined_agreement": {
+            "type": "boolean",
+            "default": false,
+            "description": "Claim closed because human and AI agreed, with no independent check (rule R3)."
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "argument": {
+      "type": "array",
+      "description": "Argument layer: where the diagnostic argument breaks and which labor repairs it.",
+      "items": {
+        "type": "object",
+        "required": [
+          "element",
+          "status",
+          "labor"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "element": {
+            "enum": [
+              "claim",
+              "data",
+              "warrant",
+              "backing",
+              "qualifier",
+              "rebuttal"
+            ]
+          },
+          "status": {
+            "enum": [
+              "missing",
+              "ambiguous",
+              "opaque",
+              "absent",
+              "unstable",
+              "expanded",
+              "persistent"
+            ]
+          },
+          "labor": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "enum": [
+                "R",
+                "C",
+                "A",
+                "I"
+              ]
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "type": "string",
+            "description": "Document and location, e.g. 'fieldnote:FN-031#L12-18' or 'published paper p.21'."
+          },
+          "quote": {
+            "type": "string",
+            "description": "Short supporting span. For real fieldnotes keep this in the private store, not the public repo."
+          }
+        }
+      }
+    }
+  }
+}

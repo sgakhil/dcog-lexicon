@@ -1,0 +1,170 @@
+{
+  "id": "vignette2_decision_support",
+  "title": "Vignette 2: Diagnostic decision support (read first, then query)",
+  "source": {
+    "kind": "vignette",
+    "origin": "Published vignette 2 (source withheld for anonymous review)",
+    "fieldnote_id": null,
+    "coder": "authors",
+    "notes": "Opaque warrant, expanded rebuttals. Comparative labor becomes reconstructive once the warrant is unavailable."
+  },
+  "ai_position": "decision_support",
+  "nodes": [
+    {
+      "id": "worklist",
+      "activity": "Worklist",
+      "detail": "chronological",
+      "system": "PACS",
+      "lane": "L",
+      "entry": true,
+      "level": 0
+    },
+    {
+      "id": "read",
+      "activity": "Read main image",
+      "detail": "independent read first, against automation bias",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 0
+    },
+    {
+      "id": "ai_ping",
+      "activity": "AI overlay",
+      "detail": "pneumothorax, no heatmap",
+      "system": "In-house AI",
+      "lane": "CR",
+      "is_ai": true,
+      "labor": [
+        "C"
+      ],
+      "ai_model": "Pneu",
+      "level": 0
+    },
+    {
+      "id": "reconstruct",
+      "activity": "Reconstruct AI claim",
+      "detail": "'what was it thinking is the pneumothorax'",
+      "system": "PACS",
+      "lane": "CL",
+      "labor": [
+        "R"
+      ],
+      "level": 1
+    },
+    {
+      "id": "history",
+      "activity": "Review patient history",
+      "detail": "surgical history; the model is 'memoryless'",
+      "system": "EHR",
+      "lane": "L",
+      "level": 1
+    },
+    {
+      "id": "dictate",
+      "activity": "Dictate report",
+      "detail": "hedged against the AI claim",
+      "system": "Dictation",
+      "lane": "R",
+      "labor": [
+        "I"
+      ],
+      "level": 0
+    },
+    {
+      "id": "signoff",
+      "activity": "Sign off report",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "worklist",
+      "to": "read",
+      "type": "action",
+      "label": "opens"
+    },
+    {
+      "from": "read",
+      "to": "ai_ping",
+      "type": "action",
+      "label": "peeks over"
+    },
+    {
+      "from": "ai_ping",
+      "to": "reconstruct",
+      "type": "doubt",
+      "label": "rebuttals: skin fold, oxygen tubing"
+    },
+    {
+      "from": "reconstruct",
+      "to": "history",
+      "type": "doubt",
+      "label": "context the model cannot reach"
+    },
+    {
+      "from": "history",
+      "to": "dictate",
+      "type": "action",
+      "label": "carries the claim"
+    },
+    {
+      "from": "dictate",
+      "to": "signoff",
+      "type": "action"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c1",
+      "claim": "AI: pneumothorax present",
+      "claim_source": "ai",
+      "states": [
+        "validation",
+        "provisional_acceptance"
+      ],
+      "trigger": "discordance",
+      "closed": true,
+      "nodes": [
+        "ai_ping",
+        "reconstruct",
+        "history",
+        "dictate",
+        "signoff"
+      ],
+      "evidence": [
+        {
+          "ref": "published interview quotes (source withheld for anonymous review)",
+          "quote": "where is the pneumothorax like is there what was it thinking"
+        }
+      ]
+    }
+  ],
+  "argument": [
+    {
+      "element": "warrant",
+      "status": "opaque",
+      "labor": [
+        "R",
+        "C"
+      ],
+      "nodes": [
+        "ai_ping",
+        "reconstruct"
+      ]
+    },
+    {
+      "element": "rebuttal",
+      "status": "expanded",
+      "labor": [
+        "I"
+      ],
+      "nodes": [
+        "history",
+        "dictate"
+      ]
+    }
+  ]
+}

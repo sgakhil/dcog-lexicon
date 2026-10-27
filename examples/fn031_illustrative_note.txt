@@ -1,0 +1,14 @@
+[ILLUSTRATIVE NOTE - written to show the format; not real fieldwork data]
+
+FN-031. Cardiothoracic reading room, afternoon. Attending (A2) works through the
+chest CT worklist in date order; this case has no AI flag on the worklist.
+She opens the study and scrolls through the lungs top to bottom, zooming on the
+bases. Says "lungs look clear" and moves her hand to the dictation mic.
+Before dictating, she glances at the right pane where the AI second-opinion
+widget has finished: it marks a 6 mm nodule in the right upper lobe. She pauses:
+"Hm. Did I miss that?" Scrolls back to the upper lobe on the left pane, finds it
+after about 20 seconds. "Okay, it's real. Tiny." Pulls up the 2023 CT from the
+priors list and measures; it was 5 mm then. Dictates the nodule with a
+Fleischner follow-up recommendation and signs off. Afterwards she tells me:
+"That's the one where it earns its keep - but I wouldn't have looked again
+without it."

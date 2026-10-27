@@ -1,0 +1,167 @@
+{
+  "id": "vignette3_predicted_example",
+  "title": "Example prediction (hand-perturbed) for vignette 3",
+  "source": {
+    "kind": "synthetic",
+    "origin": "Hand-perturbed copy of vignette3 to demonstrate compare.py",
+    "fieldnote_id": null
+  },
+  "ai_position": "second_opinion",
+  "nodes": [
+    {
+      "id": "worklist",
+      "activity": "Worklist",
+      "system": "PACS",
+      "lane": "L",
+      "entry": true,
+      "level": 0
+    },
+    {
+      "id": "read",
+      "activity": "Read main image",
+      "detail": "independent read; AI deferred",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 0
+    },
+    {
+      "id": "ai_second",
+      "activity": "AI second opinion",
+      "detail": "a 'safety net' with 'chaotic errors'",
+      "system": "Vendor AI",
+      "lane": "CR",
+      "is_ai": true,
+      "ai_model": "widget",
+      "level": 0
+    },
+    {
+      "id": "compare",
+      "activity": "Cross-check views",
+      "detail": "compare own read with AI",
+      "system": "PACS",
+      "lane": "CR",
+      "labor": [
+        "C"
+      ],
+      "level": 0
+    },
+    {
+      "id": "signoff_concordant",
+      "activity": "Sign off report",
+      "detail": "concordant",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    },
+    {
+      "id": "reexamine",
+      "activity": "Re-examine image",
+      "system": "PACS",
+      "lane": "CL",
+      "labor": [
+        "A"
+      ],
+      "level": 1
+    },
+    {
+      "id": "dictate_final",
+      "activity": "Dictate report",
+      "detail": "final claim",
+      "system": "Dictation",
+      "lane": "R",
+      "labor": [
+        "I"
+      ],
+      "closes_claim": true,
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "worklist",
+      "to": "read",
+      "type": "action",
+      "label": "opens"
+    },
+    {
+      "from": "read",
+      "to": "ai_second",
+      "type": "action"
+    },
+    {
+      "from": "ai_second",
+      "to": "compare",
+      "type": "action"
+    },
+    {
+      "from": "compare",
+      "to": "signoff_concordant",
+      "type": "action",
+      "label": "concordant"
+    },
+    {
+      "from": "compare",
+      "to": "reexamine",
+      "type": "doubt",
+      "label": "discordant"
+    },
+    {
+      "from": "reexamine",
+      "to": "dictate_final",
+      "type": "action"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c_concordant",
+      "claim": "Reader and AI agree",
+      "claim_source": "hybrid",
+      "states": [
+        "validation",
+        "provisional_acceptance"
+      ],
+      "trigger": "none",
+      "closed": true,
+      "unexamined_agreement": false,
+      "nodes": [
+        "ai_second",
+        "compare",
+        "signoff_concordant"
+      ]
+    },
+    {
+      "claim_id": "c_discordant",
+      "claim": "Reader and AI disagree",
+      "claim_source": "hybrid",
+      "states": [
+        "validation",
+        "provisional_acceptance"
+      ],
+      "trigger": "discordance",
+      "closed": true,
+      "nodes": [
+        "ai_second",
+        "compare",
+        "reexamine",
+        "dictate_final"
+      ]
+    }
+  ],
+  "argument": [
+    {
+      "element": "warrant",
+      "status": "opaque",
+      "labor": [
+        "R"
+      ]
+    },
+    {
+      "element": "rebuttal",
+      "status": "persistent",
+      "labor": [
+        "I"
+      ]
+    }
+  ]
+}

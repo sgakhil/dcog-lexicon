@@ -1,0 +1,282 @@
+{
+  "domain": "radiology",
+  "title": "AI-augmented diagnostic radiology",
+  "setting": "hospital radiology reading room",
+  "about": "Base case. Developed in 25 months of cognitive ethnography in a U.S. academic radiology department using several FDA-cleared AI tools.",
+  "lanes": {
+    "L": {
+      "title": "Left monitor",
+      "role": "queue",
+      "definition": "Left monitor: PACS worklist (with AI result column), priors, EHR, chat."
+    },
+    "CL": {
+      "title": "Centre, left pane",
+      "role": "work",
+      "definition": "Centre monitor, left pane (C1): main image."
+    },
+    "CR": {
+      "title": "Centre, right pane",
+      "role": "work",
+      "definition": "Centre monitor, right pane (C2): other views, priors, comparisons."
+    },
+    "R": {
+      "title": "Right monitor",
+      "role": "record",
+      "definition": "Right monitor: dictation and report."
+    }
+  },
+  "lane_aliases": {
+    "C1": "CL",
+    "C2": "CR"
+  },
+  "systems": {
+    "PACS": {
+      "definition": "Picture archiving and communication system (worklist and viewer).",
+      "short": "PAC"
+    },
+    "Dictation": {
+      "definition": "Voice-recognition dictation and reporting system.",
+      "short": "Dic"
+    },
+    "EHR": {
+      "definition": "Electronic health record.",
+      "short": "EHR"
+    },
+    "RIS": {
+      "definition": "Radiology information system.",
+      "short": "RIS"
+    },
+    "Vendor AI": {
+      "definition": "Commercial AI platform from an external vendor (triage, overlays, second opinion).",
+      "short": "Ai",
+      "ai": true
+    },
+    "In-house AI": {
+      "definition": "AI models developed inside the department or health system.",
+      "short": "Ai",
+      "ai": true
+    },
+    "Email": {
+      "definition": "Institutional email (e.g., alerts from the department).",
+      "short": "Email"
+    },
+    "Chat": {
+      "definition": "Messaging to reach or answer colleagues (in the PACS or the EHR).",
+      "short": "Chat"
+    },
+    "Web search": {
+      "definition": "General web search, mostly to look up reference images.",
+      "short": "Q"
+    },
+    "General-purpose AI": {
+      "definition": "ChatGPT, Grok or similar, mostly to look up reference images.",
+      "short": "Q"
+    },
+    "Rad Ops": {
+      "definition": "Radiology operations staff who contact the referring clinician.",
+      "short": "RadOps"
+    }
+  },
+  "system_aliases": {
+    "PACS Messenger": "Chat",
+    "PAC": "PACS",
+    "EMR": "EHR",
+    "Q.Google": "Web search",
+    "Q.ChatGPT": "General-purpose AI",
+    "Q.Grok": "General-purpose AI",
+    "Dictation system": "Dictation"
+  },
+  "activities": {
+    "Worklist": {
+      "definition": "Open or scan the PACS worklist and choose the next study.",
+      "aliases": [
+        "Worklist triage"
+      ]
+    },
+    "Check AI result column": {
+      "definition": "Read the AI result column in the worklist (e.g. 'No finding', 'ETT 3.4') before or instead of opening the study.",
+      "aliases": [
+        "AI column",
+        "Read AI column"
+      ]
+    },
+    "AI triage": {
+      "definition": "An AI model reorders or flags studies in the worklist before the read.",
+      "aliases": [
+        "Vendor AI triage"
+      ],
+      "ai_role": "triage"
+    },
+    "Read main image": {
+      "definition": "The reader's own read of the primary images: scrolling, zooming, windowing.",
+      "aliases": [
+        "Main Image",
+        "Main image",
+        "Independent read"
+      ]
+    },
+    "AI overlay": {
+      "definition": "An AI marking shown on or beside the image in the viewer (heatmap, box, ping).",
+      "aliases": [
+        "AI heatmap overlay",
+        "AI detection overlay",
+        "AI ping"
+      ],
+      "ai_role": "support"
+    },
+    "Cross-check views": {
+      "definition": "Compare the primary view with other views, series or the AI output in the second pane.",
+      "aliases": [
+        "Cross Checking",
+        "Cross-checking",
+        "Primary View / Other Views",
+        "Compare"
+      ]
+    },
+    "Re-examine image": {
+      "definition": "Return to the image specifically to test a claim that has been questioned.",
+      "aliases": [
+        "Re-examine"
+      ]
+    },
+    "Search priors": {
+      "definition": "Find and open earlier studies of the same patient.",
+      "aliases": [
+        "Priors",
+        "Searching priors"
+      ]
+    },
+    "Compare prior volumes": {
+      "definition": "Measure a finding against priors (size, volume, growth).",
+      "aliases": [
+        "Comparing Priors using volume"
+      ]
+    },
+    "Review patient history": {
+      "definition": "Read history, notes, labs or status in the EHR.",
+      "aliases": [
+        "Patient History",
+        "Patient history",
+        "Check status",
+        "Surgical history"
+      ]
+    },
+    "Look up reference images": {
+      "definition": "Search outside the record (web search or a general-purpose AI) for what a finding typically looks like.",
+      "aliases": [
+        "Q.Google",
+        "Q.ChatGPT",
+        "Reference lookup"
+      ]
+    },
+    "Message colleague": {
+      "definition": "Ask or answer a colleague through chat (PACS or EHR).",
+      "aliases": [
+        "Texting other Radiologist/Physician",
+        "Text colleague",
+        "Chat"
+      ]
+    },
+    "Decode AI flag": {
+      "definition": "Work out what an AI flag refers to when its what, where or why is not shown.",
+      "aliases": [
+        "Decode the flag"
+      ]
+    },
+    "Reconstruct AI claim": {
+      "definition": "Search the image for the basis of an AI claim that gives no explanation.",
+      "aliases": [
+        "Reconstruct: where is it?"
+      ]
+    },
+    "AI second opinion": {
+      "definition": "An AI read offered for comparison after the reader's own read.",
+      "aliases": [],
+      "ai_role": "second_opinion"
+    },
+    "Deprioritise case": {
+      "definition": "Set a flagged case aside and read another first.",
+      "aliases": [
+        "Deprioritise, read the unflagged case"
+      ]
+    },
+    "Dictate report": {
+      "definition": "Dictate findings and impression, often by choosing template options.",
+      "aliases": [
+        "Report",
+        "Dictate & sign off",
+        "Dictate final claim"
+      ]
+    },
+    "Flag critical result": {
+      "definition": "Insert the critical-result flag in the report macro so Rad Ops is alerted.",
+      "aliases": [
+        "Yellow flag in macro",
+        "Critical result macro"
+      ]
+    },
+    "Flag in RIS": {
+      "definition": "Mark the case in the radiology information system for follow-up.",
+      "aliases": [
+        "Flagging RIS",
+        "Flag in RS"
+      ]
+    },
+    "Sign off report": {
+      "definition": "Sign the report. The point where a claim reaches closure.",
+      "aliases": [
+        "Signing off",
+        "Sign off"
+      ]
+    },
+    "Notify clinician via Rad Ops": {
+      "definition": "Rad Ops staff contact the referring clinician about a flagged result.",
+      "aliases": [
+        "Rad Ops reaches clinician"
+      ]
+    },
+    "Model update drift": {
+      "definition": "Institutional event: a model's behaviour changes after an update.",
+      "aliases": [
+        "Drifts on Update"
+      ]
+    },
+    "Non-engagement alert": {
+      "definition": "Institutional event: the department tracks whether readers looked at the AI output.",
+      "aliases": []
+    }
+  },
+  "practices": {
+    "scrolling": [],
+    "zooming": [],
+    "switching": [],
+    "triage": [],
+    "searching": [],
+    "identifying": [],
+    "choose options": [
+      "Chose options"
+    ],
+    "impressions": [],
+    "findings": [],
+    "confirming": [],
+    "cross checking": [],
+    "validating AI claim": [
+      "Validating the AI claims"
+    ]
+  },
+  "ai_models": {
+    "triage": "Vendor triage model shown in the worklist (square Ai in the notebook)",
+    "widget": "Vendor model shown as a widget in the viewer (rounded Ai in the notebook)",
+    "Pneu": "Pneumothorax model",
+    "ETT": "Endotracheal tube position model",
+    "MSK": "Musculoskeletal or fracture model",
+    "PE": "Pulmonary embolism model",
+    "nodule": "Lung nodule model",
+    "other": "Any other model; name it in detail"
+  },
+  "independent_checks": "Priors, other views or series, measurements against priors, patient history, a colleague, a reference image.",
+  "example": {
+    "note": "examples/fn031_illustrative_note.txt",
+    "map": "examples/episode_fn031.json"
+  }
+}

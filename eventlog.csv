@@ -1,0 +1,48 @@
+case_id,seq,activity,node_id,lane,level,system,is_ai,ai_model,ai_output,reached_via,labor,claim_states,closes_claim
+vignette1_automated_triage,0,AI triage,ai_triage,L,0,Vendor AI,True,triage,,entry,,c1:validation>deferral,False
+vignette1_automated_triage,1,Worklist,worklist,L,0,PACS,False,,,action,A,c1:validation>deferral,False
+vignette1_automated_triage,2,Decode AI flag,decode,CL,0,PACS,False,,,action,R,c1:validation>deferral,False
+vignette1_automated_triage,3,Review patient history,status,CR,1,EHR,False,,,doubt,,c1:validation>deferral,False
+vignette1_automated_triage,4,Deprioritise case,deprioritise,CL,0,PACS,False,,,action,,c1:validation>deferral,False
+vignette1_automated_triage,5,Dictate report,dictate,R,0,Dictation,False,,,action,I,c2:provisional_acceptance,False
+vignette1_automated_triage,6,Sign off report,signoff,R,0,Dictation,False,,,action,,c2:provisional_acceptance,True
+vignette2_decision_support,0,Worklist,worklist,L,0,PACS,False,,,entry,,,False
+vignette2_decision_support,1,Read main image,read,CL,0,PACS,False,,,action,,,False
+vignette2_decision_support,2,AI overlay,ai_ping,CR,0,In-house AI,True,Pneu,,action,C,c1:validation>provisional_acceptance,False
+vignette2_decision_support,3,Reconstruct AI claim,reconstruct,CL,1,PACS,False,,,doubt,R,c1:validation>provisional_acceptance,False
+vignette2_decision_support,4,Review patient history,history,L,1,EHR,False,,,doubt,,c1:validation>provisional_acceptance,False
+vignette2_decision_support,5,Dictate report,dictate,R,0,Dictation,False,,,action,I,c1:validation>provisional_acceptance,False
+vignette2_decision_support,6,Sign off report,signoff,R,0,Dictation,False,,,action,,c1:validation>provisional_acceptance,True
+vignette3_second_opinion,0,Worklist,worklist,L,0,PACS,False,,,entry,,,False
+vignette3_second_opinion,1,Read main image,read,CL,0,PACS,False,,,action,,,False
+vignette3_second_opinion,2,AI second opinion,ai_second,CR,0,Vendor AI,True,widget,,action,,c_concordant:provisional_acceptance|c_discordant:validation>provisional_acceptance,False
+vignette3_second_opinion,3,Cross-check views,compare,CR,0,PACS,False,,,action,C,c_concordant:provisional_acceptance|c_discordant:validation>provisional_acceptance,False
+vignette3_second_opinion,4,Non-engagement alert,alert,R,0,Email,False,,,institutional,A,,False
+vignette3_second_opinion,5,Sign off report,signoff_concordant,R,0,Dictation,False,,,action,,c_concordant:provisional_acceptance,True
+vignette3_second_opinion,6,Re-examine image,reexamine,CL,1,PACS,False,,,doubt,A,c_discordant:validation>provisional_acceptance,False
+vignette3_second_opinion,7,Dictate report,dictate_final,R,0,Dictation,False,,,action,I,c_discordant:validation>provisional_acceptance,True
+vignette3_second_opinion,8,Model update drift,drift,CR,0,In-house AI,True,other,,unreached,,,False
+dev_episode_illustrative,0,Pick up ticket,ticket,T,0,Issue tracker,False,,,entry,,,False
+dev_episode_illustrative,1,Read code,read,E,0,IDE,False,,,action,,,False
+dev_episode_illustrative,2,Accept inline suggestion,completion,E,0,Code assistant,True,inline_completion,,action,,,False
+dev_episode_illustrative,3,Run code,run,X,0,Terminal,False,,,action,,,False
+dev_episode_illustrative,4,Ask AI assistant,ask_ai,S,1,AI chat,True,chat_assistant,a fix and a short explanation,doubt,,c_fix:provisional_acceptance,False
+dev_episode_illustrative,5,Paste AI answer,paste,E,1,IDE,False,,,action,,c_fix:provisional_acceptance,False
+dev_episode_illustrative,6,Open pull request,pr,P,0,Git host,False,,,action,,c_fix:provisional_acceptance,False
+dev_episode_illustrative,7,AI review comment,ai_review,P,0,AI review bot,True,ai_review,No issues found,action,,c_ready:consultation>validation>provisional_acceptance,False
+dev_episode_illustrative,8,Human review,review,P,0,Git host,False,,,action,,c_ready:consultation>validation>provisional_acceptance,False
+dev_episode_illustrative,9,Run tests,tests,X,1,Terminal,False,,,doubt,,c_ready:consultation>validation>provisional_acceptance,False
+dev_episode_illustrative,10,Write code,fix,E,1,IDE,False,,,doubt,,c_ready:consultation>validation>provisional_acceptance,False
+dev_episode_illustrative,11,Merge,merge,P,0,Git host,False,,,action,,c_ready:consultation>validation>provisional_acceptance,True
+legal_episode_synthetic,0,Receive assignment,assign,M,0,Email,False,,,entry,,,False
+legal_episode_synthetic,1,Read documents,read,D,0,Document management,False,,,action,,,False
+legal_episode_synthetic,2,Ask AI assistant,ask_ai,A,0,Legal AI assistant,True,research_assistant,an answer citing three cases,action,,c_cases:provisional_acceptance|c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,3,Paste AI text,paste,D,0,Word processor,False,,,action,,c_cases:provisional_acceptance,False
+legal_episode_synthetic,4,Search case law,search,L,0,Case-law database,False,,,action,,c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,5,Check citation,cite,L,1,Citator,False,,,doubt,,c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,6,Read source,read_src,L,1,Case-law database,False,,,doubt,C,c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,7,Ask colleague,colleague,M,2,Team chat,False,,,doubt,,c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,8,Draft text,redraft,D,1,Word processor,False,,,action,RI,c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,9,Find precedent,precedent,L,2,Document management,False,,,action,,,False
+legal_episode_synthetic,10,Senior review,review,S,0,Email,False,,,action,,c_memo:validation>consultation>provisional_acceptance,False
+legal_episode_synthetic,11,Send or file,send,S,0,Email,False,,,action,,c_memo:validation>consultation>provisional_acceptance,True

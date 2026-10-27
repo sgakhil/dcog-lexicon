@@ -1,0 +1,172 @@
+{
+  "id": "vignette1_automated_triage",
+  "title": "Vignette 1: Automated triage (the AI argues first)",
+  "source": {
+    "kind": "vignette",
+    "origin": "Published vignette 1 (source withheld for anonymous review)",
+    "fieldnote_id": null,
+    "coder": "authors",
+    "notes": "Missing warrant, unstable qualifier. Reader checks EMR, finds the patient stable, and deprioritises the flagged case."
+  },
+  "ai_position": "triage",
+  "nodes": [
+    {
+      "id": "ai_triage",
+      "activity": "AI triage",
+      "system": "Vendor AI",
+      "lane": "L",
+      "is_ai": true,
+      "entry": true,
+      "ai_model": "triage",
+      "level": 0
+    },
+    {
+      "id": "worklist",
+      "activity": "Worklist",
+      "detail": "AI finding column: 'suspicious finding'",
+      "system": "PACS",
+      "lane": "L",
+      "labor": [
+        "A"
+      ],
+      "level": 0
+    },
+    {
+      "id": "decode",
+      "activity": "Decode AI flag",
+      "detail": "what, where, why unstated",
+      "system": "PACS",
+      "lane": "CL",
+      "labor": [
+        "R"
+      ],
+      "level": 0
+    },
+    {
+      "id": "status",
+      "activity": "Review patient history",
+      "detail": "check status; reader supplies the rebuttal",
+      "system": "EHR",
+      "lane": "CR",
+      "level": 1
+    },
+    {
+      "id": "deprioritise",
+      "activity": "Deprioritise case",
+      "detail": "patient 'in a collar and laying in a bed'; reads the unflagged case",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 0
+    },
+    {
+      "id": "dictate",
+      "activity": "Dictate report",
+      "system": "Dictation",
+      "lane": "R",
+      "labor": [
+        "I"
+      ],
+      "level": 0
+    },
+    {
+      "id": "signoff",
+      "activity": "Sign off report",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "ai_triage",
+      "to": "worklist",
+      "type": "action",
+      "label": "reorders"
+    },
+    {
+      "from": "worklist",
+      "to": "decode",
+      "type": "action",
+      "label": "opens"
+    },
+    {
+      "from": "decode",
+      "to": "status",
+      "type": "doubt",
+      "label": "checks"
+    },
+    {
+      "from": "status",
+      "to": "deprioritise",
+      "type": "action"
+    },
+    {
+      "from": "deprioritise",
+      "to": "dictate",
+      "type": "action",
+      "label": "dictates"
+    },
+    {
+      "from": "dictate",
+      "to": "signoff",
+      "type": "action"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c1",
+      "claim": "Triage flag: suspicious finding, high priority",
+      "claim_source": "ai",
+      "states": [
+        "validation",
+        "deferral"
+      ],
+      "trigger": "ai_generated_doubt",
+      "closed": false,
+      "nodes": [
+        "ai_triage",
+        "worklist",
+        "decode",
+        "status",
+        "deprioritise"
+      ]
+    },
+    {
+      "claim_id": "c2",
+      "claim": "Report on the unflagged case read instead",
+      "claim_source": "human",
+      "states": [
+        "provisional_acceptance"
+      ],
+      "trigger": "none",
+      "closed": true,
+      "nodes": [
+        "dictate",
+        "signoff"
+      ]
+    }
+  ],
+  "argument": [
+    {
+      "element": "warrant",
+      "status": "missing",
+      "labor": [
+        "R"
+      ],
+      "nodes": [
+        "decode"
+      ]
+    },
+    {
+      "element": "qualifier",
+      "status": "unstable",
+      "labor": [
+        "A"
+      ],
+      "nodes": [
+        "worklist"
+      ]
+    }
+  ]
+}

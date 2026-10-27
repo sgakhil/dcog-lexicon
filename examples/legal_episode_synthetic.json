@@ -1,0 +1,67 @@
+{
+  "id": "legal_episode_synthetic",
+  "domain": "legal",
+  "title": "Associate: a non-compete memo with an AI research assistant",
+  "source": {
+    "kind": "synthetic",
+    "origin": "Synthetic note written to show the lexicon in a third setting (extension case); not fieldwork data",
+    "fieldnote_id": "examples/legal_synthetic_note.txt",
+    "coder": "authors (illustration, drafted with an AI assistant)",
+    "notes": "Same structure as the radiology and software maps: AI-suggested authorities accepted on the strength of their summaries, closed with nothing independent checked; a failed search re-opens the work and sends the associate to the sources themselves and to a colleague.",
+    "observation": {"informant_role": "other", "setting": "law firm (synthetic)"}
+  },
+  "ai_position": "decision_support",
+  "nodes": [
+    {"id": "assign", "activity": "Receive assignment", "detail": "partner asks for a non-compete memo", "system": "Email", "lane": "M", "entry": true, "level": 0},
+    {"id": "read", "activity": "Read documents", "detail": "reads the clause", "system": "Document management", "lane": "D", "level": 0},
+    {"id": "ask_ai", "activity": "Ask AI assistant", "detail": "is this enforceable here?", "system": "Legal AI assistant", "lane": "A", "is_ai": true, "ai_model": "research_assistant", "ai_output": "an answer citing three cases", "level": 0},
+    {"id": "paste", "activity": "Paste AI text", "detail": "'These look on point'; cases not read", "system": "Word processor", "lane": "D", "level": 0},
+    {"id": "search", "activity": "Search case law", "detail": "looks up the third case to quote it: no results", "system": "Case-law database", "lane": "L", "level": 0},
+    {"id": "cite", "activity": "Check citation", "detail": "no such case", "system": "Citator", "lane": "L", "level": 1},
+    {"id": "read_src", "activity": "Read source", "detail": "first holds; second is about a sale of business", "system": "Case-law database", "lane": "L", "level": 1, "labor": ["C"]},
+    {"id": "colleague", "activity": "Ask colleague", "detail": "K1 points to last year's firm memo", "system": "Team chat", "lane": "M", "level": 2},
+    {"id": "precedent", "activity": "Find precedent", "system": "Document management", "lane": "L", "level": 2},
+    {"id": "redraft", "activity": "Draft text", "detail": "drops the third case, narrows the conclusion", "system": "Word processor", "lane": "D", "level": 1, "labor": ["R", "I"]},
+    {"id": "review", "activity": "Senior review", "detail": "partner, one edit", "system": "Email", "lane": "S", "level": 0},
+    {"id": "send", "activity": "Send or file", "detail": "memo final", "system": "Email", "lane": "S", "closes_claim": true, "level": 0}
+  ],
+  "edges": [
+    {"from": "assign", "to": "read", "type": "action"},
+    {"from": "read", "to": "ask_ai", "type": "action"},
+    {"from": "ask_ai", "to": "paste", "type": "action", "label": "looks on point"},
+    {"from": "paste", "to": "search", "type": "action", "label": "to quote case 3"},
+    {"from": "search", "to": "cite", "type": "doubt", "label": "no results"},
+    {"from": "cite", "to": "read_src", "type": "doubt", "label": "check them all"},
+    {"from": "read_src", "to": "colleague", "type": "doubt", "label": "case 2 off point"},
+    {"from": "colleague", "to": "precedent", "type": "action"},
+    {"from": "precedent", "to": "redraft", "type": "action"},
+    {"from": "read_src", "to": "redraft", "type": "action"},
+    {"from": "redraft", "to": "review", "type": "action"},
+    {"from": "review", "to": "send", "type": "action"}
+  ],
+  "routing": [
+    {
+      "claim_id": "c_cases",
+      "claim": "The three cases the AI cited support enforceability",
+      "claim_source": "hybrid",
+      "states": ["provisional_acceptance"],
+      "trigger": "none",
+      "closed": true,
+      "unexamined_agreement": true,
+      "nodes": ["ask_ai", "paste"]
+    },
+    {
+      "claim_id": "c_memo",
+      "claim": "The non-compete is likely enforceable, narrowly",
+      "claim_source": "hybrid",
+      "states": ["validation", "consultation", "provisional_acceptance"],
+      "trigger": "substantive_doubt",
+      "closed": true,
+      "nodes": ["ask_ai", "search", "cite", "read_src", "colleague", "redraft", "review", "send"]
+    }
+  ],
+  "argument": [
+    {"element": "backing", "status": "unstable", "labor": ["C"], "nodes": ["search", "cite", "read_src"]},
+    {"element": "qualifier", "status": "expanded", "labor": ["R", "I"], "nodes": ["read_src", "redraft"]}
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "id": "vignette3_second_opinion",
+  "title": "Vignette 3: Second-opinion augmentation (the 'virtual resident')",
+  "source": {
+    "kind": "vignette",
+    "origin": "Published vignette 3 (source withheld for anonymous review)",
+    "fieldnote_id": null,
+    "coder": "authors",
+    "notes": "Unstable backing, persistent rebuttals. The concordant branch goes straight to sign-off: agreement closes the claim with no independent check."
+  },
+  "ai_position": "second_opinion",
+  "nodes": [
+    {
+      "id": "worklist",
+      "activity": "Worklist",
+      "system": "PACS",
+      "lane": "L",
+      "entry": true,
+      "level": 0
+    },
+    {
+      "id": "read",
+      "activity": "Read main image",
+      "detail": "independent read; AI deferred",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 0
+    },
+    {
+      "id": "ai_second",
+      "activity": "AI second opinion",
+      "detail": "a 'safety net' with 'chaotic errors'",
+      "system": "Vendor AI",
+      "lane": "CR",
+      "is_ai": true,
+      "ai_model": "widget",
+      "level": 0
+    },
+    {
+      "id": "compare",
+      "activity": "Cross-check views",
+      "detail": "compare own read with AI",
+      "system": "PACS",
+      "lane": "CR",
+      "labor": [
+        "C"
+      ],
+      "level": 0
+    },
+    {
+      "id": "signoff_concordant",
+      "activity": "Sign off report",
+      "detail": "concordant",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    },
+    {
+      "id": "reexamine",
+      "activity": "Re-examine image",
+      "system": "PACS",
+      "lane": "CL",
+      "labor": [
+        "A"
+      ],
+      "level": 1
+    },
+    {
+      "id": "dictate_final",
+      "activity": "Dictate report",
+      "detail": "final claim",
+      "system": "Dictation",
+      "lane": "R",
+      "labor": [
+        "I"
+      ],
+      "closes_claim": true,
+      "level": 0
+    },
+    {
+      "id": "drift",
+      "activity": "Model update drift",
+      "detail": "one model only, built after an update",
+      "system": "In-house AI",
+      "lane": "CR",
+      "is_ai": true,
+      "ai_model": "other",
+      "level": 0
+    },
+    {
+      "id": "alert",
+      "activity": "Non-engagement alert",
+      "detail": "alert email, tracked",
+      "system": "Email",
+      "lane": "R",
+      "labor": [
+        "A"
+      ],
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "worklist",
+      "to": "read",
+      "type": "action",
+      "label": "opens"
+    },
+    {
+      "from": "read",
+      "to": "ai_second",
+      "type": "action"
+    },
+    {
+      "from": "ai_second",
+      "to": "compare",
+      "type": "action"
+    },
+    {
+      "from": "compare",
+      "to": "signoff_concordant",
+      "type": "action",
+      "label": "concordant"
+    },
+    {
+      "from": "compare",
+      "to": "reexamine",
+      "type": "doubt",
+      "label": "discordant"
+    },
+    {
+      "from": "reexamine",
+      "to": "dictate_final",
+      "type": "action"
+    },
+    {
+      "from": "drift",
+      "to": "ai_second",
+      "type": "institutional",
+      "label": "update changes behaviour"
+    },
+    {
+      "from": "ai_second",
+      "to": "alert",
+      "type": "institutional",
+      "label": "engagement tracked"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c_concordant",
+      "claim": "Reader and AI agree",
+      "claim_source": "hybrid",
+      "states": [
+        "provisional_acceptance"
+      ],
+      "trigger": "none",
+      "closed": true,
+      "unexamined_agreement": true,
+      "nodes": [
+        "ai_second",
+        "compare",
+        "signoff_concordant"
+      ]
+    },
+    {
+      "claim_id": "c_discordant",
+      "claim": "Reader and AI disagree",
+      "claim_source": "hybrid",
+      "states": [
+        "validation",
+        "provisional_acceptance"
+      ],
+      "trigger": "discordance",
+      "closed": true,
+      "nodes": [
+        "ai_second",
+        "compare",
+        "reexamine",
+        "dictate_final"
+      ]
+    }
+  ],
+  "argument": [
+    {
+      "element": "backing",
+      "status": "unstable",
+      "labor": [
+        "A"
+      ],
+      "nodes": [
+        "drift",
+        "alert",
+        "reexamine"
+      ]
+    },
+    {
+      "element": "rebuttal",
+      "status": "persistent",
+      "labor": [
+        "I"
+      ],
+      "nodes": [
+        "dictate_final"
+      ]
+    }
+  ]
+}

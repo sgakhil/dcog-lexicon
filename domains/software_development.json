@@ -1,0 +1,200 @@
+{
+  "domain": "software_development",
+  "title": "Software development with AI coding assistants",
+  "setting": "software team's open-plan office",
+  "about": "Extension case: written to show how the lexicon carries to a second setting. Synthetic; not yet tested on fieldwork.",
+  "lanes": {
+    "T": {
+      "title": "Tracker",
+      "role": "queue",
+      "definition": "Ticket tracker and notifications: where work arrives and is prioritised."
+    },
+    "E": {
+      "title": "Editor",
+      "role": "work",
+      "definition": "Code editor, including inline AI completions."
+    },
+    "S": {
+      "title": "Side panel",
+      "role": "work",
+      "definition": "AI chat panel, documentation and web search beside the editor."
+    },
+    "X": {
+      "title": "Terminal",
+      "role": "work",
+      "definition": "Terminal: running code, tests and reading logs."
+    },
+    "P": {
+      "title": "Pull request",
+      "role": "record",
+      "definition": "Version control and code review: commits, pull requests, review comments, merge."
+    }
+  },
+  "lane_aliases": {
+    "Tracker": "T",
+    "Editor": "E",
+    "IDE": "E",
+    "Chat": "S",
+    "Terminal": "X",
+    "PR": "P"
+  },
+  "systems": {
+    "Issue tracker": {
+      "definition": "Ticket or issue tracker (e.g. Jira, Linear).",
+      "short": "Tix"
+    },
+    "IDE": {
+      "definition": "Code editor or IDE.",
+      "short": "IDE"
+    },
+    "Code assistant": {
+      "definition": "Inline AI completion in the editor.",
+      "short": "Ai",
+      "ai": true
+    },
+    "AI chat": {
+      "definition": "AI chat assistant in a side panel or browser.",
+      "short": "Ai",
+      "ai": true
+    },
+    "AI review bot": {
+      "definition": "AI that comments on pull requests.",
+      "short": "Ai",
+      "ai": true
+    },
+    "Docs and search": {
+      "definition": "Documentation, Stack Overflow, web search.",
+      "short": "Docs"
+    },
+    "Terminal": {
+      "definition": "Shell, local run, test runner, logs.",
+      "short": "Term"
+    },
+    "Git host": {
+      "definition": "Version control host: branches, pull requests, review, merge.",
+      "short": "Git"
+    },
+    "CI": {
+      "definition": "Continuous integration: automated builds and tests on each push.",
+      "short": "CI"
+    },
+    "Team chat": {
+      "definition": "Messaging with colleagues (e.g. Slack).",
+      "short": "Chat"
+    }
+  },
+  "system_aliases": {
+    "Jira": "Issue tracker",
+    "VS Code": "IDE",
+    "Copilot": "Code assistant",
+    "ChatGPT": "AI chat",
+    "Slack": "Team chat",
+    "GitHub": "Git host"
+  },
+  "activities": {
+    "Pick up ticket": {
+      "definition": "Choose the next ticket and read what is asked.",
+      "aliases": [
+        "Read ticket"
+      ]
+    },
+    "Read code": {
+      "definition": "Read the existing code around the change.",
+      "aliases": []
+    },
+    "Write code": {
+      "definition": "The developer's own writing or editing of code.",
+      "aliases": [
+        "Edit code"
+      ]
+    },
+    "Accept inline suggestion": {
+      "definition": "Accept an AI completion offered in the editor.",
+      "aliases": [
+        "Tab-complete"
+      ],
+      "ai_role": "support"
+    },
+    "Ask AI assistant": {
+      "definition": "Put a question or error to an AI chat assistant and read its answer.",
+      "aliases": [
+        "Prompt AI"
+      ],
+      "ai_role": "support"
+    },
+    "Paste AI answer": {
+      "definition": "Copy code or text from the AI answer into the work.",
+      "aliases": []
+    },
+    "Read documentation": {
+      "definition": "Look up documentation, examples or forum answers.",
+      "aliases": [
+        "Search docs"
+      ]
+    },
+    "Run code": {
+      "definition": "Run the program locally and look at what happens.",
+      "aliases": [
+        "Run locally"
+      ]
+    },
+    "Run tests": {
+      "definition": "Run the test suite or specific tests.",
+      "aliases": []
+    },
+    "Read error output": {
+      "definition": "Read an error message, stack trace or log.",
+      "aliases": [
+        "Read logs"
+      ]
+    },
+    "Ask colleague": {
+      "definition": "Ask or answer a colleague in chat or in person.",
+      "aliases": []
+    },
+    "Open pull request": {
+      "definition": "Commit, push and open a pull request for review.",
+      "aliases": [
+        "Commit and push"
+      ]
+    },
+    "AI review comment": {
+      "definition": "An AI reviewer comments on the pull request.",
+      "aliases": [],
+      "ai_role": "second_opinion"
+    },
+    "Human review": {
+      "definition": "A colleague reviews the pull request and comments.",
+      "aliases": [
+        "Code review"
+      ]
+    },
+    "CI result": {
+      "definition": "Automated build and tests report pass or fail.",
+      "aliases": []
+    },
+    "Merge": {
+      "definition": "Merge the change. The point where a claim reaches closure.",
+      "aliases": []
+    }
+  },
+  "practices": {
+    "reading": [],
+    "typing": [],
+    "scrolling": [],
+    "searching": [],
+    "debugging": [],
+    "comparing diff": []
+  },
+  "ai_models": {
+    "inline_completion": "Completion that appears as ghost text in the editor.",
+    "chat_assistant": "Conversational assistant answering questions or proposing code.",
+    "ai_review": "Automated reviewer commenting on pull requests.",
+    "other": "Any other model; name it in detail."
+  },
+  "independent_checks": "Running the code, running tests, CI results, documentation, a colleague's review. Re-reading the AI answer is not a check.",
+  "example": {
+    "note": "examples/dev_illustrative_note.txt",
+    "map": "examples/dev_episode_illustrative.json"
+  }
+}

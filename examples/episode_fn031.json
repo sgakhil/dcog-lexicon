@@ -1,0 +1,131 @@
+{
+  "id": "episode_fn031",
+  "title": "FN-031: Nodule found only after the AI second opinion",
+  "source": {
+    "kind": "episode",
+    "origin": "Illustrative example written for the prompt; not real fieldwork data",
+    "fieldnote_id": "examples/fn031_illustrative_note.txt",
+    "coder": "authors"
+  },
+  "ai_position": "second_opinion",
+  "nodes": [
+    {
+      "id": "worklist",
+      "activity": "Worklist",
+      "system": "PACS",
+      "lane": "L",
+      "entry": true,
+      "level": 0
+    },
+    {
+      "id": "read",
+      "activity": "Read main image",
+      "detail": "independent read, finds nothing",
+      "system": "PACS",
+      "lane": "CL",
+      "level": 0
+    },
+    {
+      "id": "ai",
+      "activity": "AI second opinion",
+      "detail": "flags 6 mm nodule",
+      "system": "Vendor AI",
+      "lane": "CR",
+      "is_ai": true,
+      "ai_model": "nodule",
+      "level": 0
+    },
+    {
+      "id": "reexamine",
+      "activity": "Re-examine image",
+      "detail": "scrolls back, finds it",
+      "system": "PACS",
+      "lane": "CL",
+      "labor": [
+        "C"
+      ],
+      "level": 1
+    },
+    {
+      "id": "priors",
+      "activity": "Compare prior volumes",
+      "detail": "2023 CT",
+      "system": "PACS",
+      "lane": "L",
+      "level": 1
+    },
+    {
+      "id": "dictate",
+      "activity": "Dictate report",
+      "detail": "nodule + follow-up recommendation",
+      "system": "Dictation",
+      "lane": "R",
+      "labor": [
+        "I"
+      ],
+      "level": 0
+    },
+    {
+      "id": "signoff",
+      "activity": "Sign off report",
+      "system": "Dictation",
+      "lane": "R",
+      "closes_claim": true,
+      "level": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "worklist",
+      "to": "read",
+      "type": "action",
+      "label": "opens"
+    },
+    {
+      "from": "read",
+      "to": "ai",
+      "type": "action"
+    },
+    {
+      "from": "ai",
+      "to": "reexamine",
+      "type": "doubt",
+      "label": "discordant"
+    },
+    {
+      "from": "reexamine",
+      "to": "priors",
+      "type": "doubt"
+    },
+    {
+      "from": "priors",
+      "to": "dictate",
+      "type": "action"
+    },
+    {
+      "from": "dictate",
+      "to": "signoff",
+      "type": "action"
+    }
+  ],
+  "routing": [
+    {
+      "claim_id": "c1",
+      "claim": "AI: 6 mm pulmonary nodule",
+      "claim_source": "ai",
+      "states": [
+        "validation",
+        "provisional_acceptance"
+      ],
+      "trigger": "discordance",
+      "closed": true,
+      "nodes": [
+        "ai",
+        "reexamine",
+        "priors",
+        "signoff"
+      ]
+    }
+  ],
+  "argument": []
+}

@@ -1,0 +1,77 @@
+{
+  "version": "1.2",
+  "about": "Domain-neutral part of the lexicon: how steps link, how claims are handled, how arguments break. Every domain file uses these terms unchanged.",
+  "lane_roles": {
+    "queue": "Where work arrives and is sorted or prioritised (a worklist, a ticket queue, an inbox).",
+    "work": "Where the main task is done and checked (an image viewer, a code editor, a case file).",
+    "record": "Where the result is written down, signed or shipped (a report, a pull request, a decision letter)."
+  },
+  "edge_types": {
+    "action": "The ordinary next step in the work (solid arrow).",
+    "doubt": "A step taken because a claim was questioned; it re-opens appraisal (dashed arrow).",
+    "institutional": "An influence that runs through the organisation rather than the read, such as a model update or engagement tracking (dotted arrow)."
+  },
+  "states": {
+    "provisional_acceptance": "The claim is taken as good enough to act on. The only state that closes a claim.",
+    "validation": "The claim is checked against something independent of it. What counts as independent is listed in each domain file. Looking again at the same output that made the claim is not validation.",
+    "consultation": "The claim is put to another person: a colleague, a senior, a client.",
+    "deferral": "The claim is set aside unresolved: deprioritised, withheld, or carried forward."
+  },
+  "triggers": {
+    "none": "Nothing re-opened appraisal.",
+    "substantive_doubt": "The person's own doubt about the work.",
+    "ai_generated_doubt": "An AI flag, marking or message prompted the check.",
+    "discordance": "The person's own judgement and the AI output disagreed.",
+    "protocol": "A rule required the check, whatever the person thought."
+  },
+  "claim_sources": {
+    "human": "Asserted by a person.",
+    "ai": "Asserted by an AI model.",
+    "hybrid": "Asserted jointly, typically when reader and AI agree."
+  },
+  "toulmin": {
+    "claim": "The conclusion asserted (a finding, a diagnosis, a fix).",
+    "data": "The evidence the claim rests on.",
+    "warrant": "Why the data supports the claim.",
+    "backing": "What makes the warrant trustworthy (for an AI, how it was validated or trained).",
+    "qualifier": "How strongly the claim is held (priority, confidence).",
+    "rebuttal": "Conditions under which the claim would not hold."
+  },
+  "argument_status": {
+    "missing": "The element is not given at all (e.g. a flag with no reason).",
+    "ambiguous": "The element is given but can be read more than one way.",
+    "opaque": "The element exists but cannot be inspected.",
+    "absent": "The reader would expect it and it is not there.",
+    "unstable": "The element changes over time or between cases (e.g. after a model update).",
+    "expanded": "The reader adds more of this element than usual (e.g. extra rebuttals).",
+    "persistent": "The element stays open after sign-off (e.g. a rebuttal carried into the report)."
+  },
+  "labor": {
+    "R": "Reconstructive: reverse-engineering a missing warrant",
+    "C": "Comparative: testing own judgment against the machine, case by case",
+    "A": "Adjudicative: deciding to trust or dismiss under false flags, drift, alerts",
+    "I": "Integrative: synthesising machine output with history, physiology, trajectory"
+  },
+  "ai_roles": {
+    "triage": "AI sorts, flags or prioritises work before the person does it.",
+    "support": "AI assists while the person does the work.",
+    "second_opinion": "AI checks or reviews after the person has done the work."
+  },
+  "ai_positions": {
+    "none": "No AI element in the episode.",
+    "implicit_confirmatory": "AI output is present but only confirms what the person already saw; it does not change the path.",
+    "triage": "AI acts before the work, in the queue.",
+    "decision_support": "AI acts during the work.",
+    "second_opinion": "AI acts after the person's own work, as a check.",
+    "triage_and_decision_support": "AI acts both before and during the work.",
+    "decision_support_and_second_opinion": "AI acts both during the work and after it."
+  },
+  "source_kinds": {
+    "case_type": "Composite of many observations.",
+    "vignette": "Composite written up as a vignette in a paper.",
+    "session": "Patterns observed with one informant in one observation session.",
+    "episode": "One observed episode.",
+    "illustrative": "Written to illustrate the notation; not fieldwork data.",
+    "synthetic": "Generated test note with a known answer."
+  }
+}
